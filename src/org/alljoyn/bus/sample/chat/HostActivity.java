@@ -46,6 +46,9 @@ public class HostActivity extends Activity implements Observer {
         mChannelName = (TextView)findViewById(R.id.hostChannelName);
         mChannelName.setText("");
         
+        mChannelNick= (TextView)findViewById(R.id.hostNickname);
+       
+        
         mChannelStatus = (TextView)findViewById(R.id.hostChannelStatus);
         mChannelStatus.setText("Idle");
         
@@ -103,7 +106,10 @@ public class HostActivity extends Activity implements Observer {
                 mChatApplication.quit();
             }
         });
+   
+    
     }
+    
     
 	public void onDestroy() {
         Log.i(TAG, "onDestroy()");
@@ -171,15 +177,17 @@ public class HostActivity extends Activity implements Observer {
         }
     }
     
-    private void updateChannelState() {
+    public void updateChannelState() {
     	AllJoynService.HostChannelState channelState = mChatApplication.hostGetChannelState();
     	String name = mChatApplication.hostGetChannelName();
+    	
     	boolean haveName = true;
     	if (name == null) {
     		haveName = false;
     		name = "Not set";
     	}
         mChannelName.setText(name);
+      
         switch (channelState) {
         case IDLE:
             mChannelStatus.setText("Idle");
@@ -216,8 +224,14 @@ public class HostActivity extends Activity implements Observer {
         }
     }
     
+    private void updateNick(){
+    	String nick=mChatApplication.getNickName();
+    	  mChannelNick.setText(nick);
+    }
+    
     private TextView mChannelName;
     private TextView mChannelStatus;
+    private TextView mChannelNick;
     private Button mSetNameButton;
     private Button mStartButton;
     private Button mStopButton;

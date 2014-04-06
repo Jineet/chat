@@ -16,6 +16,7 @@
 
 package org.alljoyn.bus.sample.chat;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 
@@ -30,10 +31,12 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.util.List;
 
+@TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class DialogBuilder {
     private static final String TAG = "chat.Dialogs";
     
@@ -68,7 +71,10 @@ public class DialogBuilder {
 				 * wrong since it can change.  We have to tell the Android
 				 * application framework to forget about this dialog completely.
 				 */
+    			
+    			activity.showDialog(UseActivity.DIALOG_NICK_ID);
     			activity.removeDialog(UseActivity.DIALOG_JOIN_ID);
+    			
     		}
     	});
     	        	           
@@ -152,6 +158,48 @@ public class DialogBuilder {
         return dialog;
     }
     
+    
+    public Dialog createHostNickDialog(Activity activity, final ChatApplication application) {
+       	Log.i(TAG, "createHostNameDialog()");
+    	final Dialog dialog = new Dialog(activity);
+    	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
+    	dialog.setContentView(R.layout.hostnickdialog);
+    	
+        final EditText channel = (EditText)dialog.findViewById(R.id.editTextNick);
+        
+        channel.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
+                	String name = view.getText().toString();
+                	
+                	application.setNickName(name);
+    				//validate method to be called here
+                	dialog.cancel();
+                }
+                return true;
+            }
+        });
+    	
+        Button okay = (Button)dialog.findViewById(R.id.buttonOkNick);
+        okay.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+            	String name = channel.getText().toString();
+            	
+            	application.setNickName(name);
+				//validate method to be called here
+    			dialog.cancel();
+            }
+        });
+        
+        Button cancel = (Button)dialog.findViewById(R.id.buttonOkNick2);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                dialog.cancel();
+            }
+        });
+        
+        return dialog;
+    }
     public Dialog createHostStartDialog(Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostStartDialog()");
     	final Dialog dialog = new Dialog(activity);

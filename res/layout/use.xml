@@ -19,6 +19,15 @@
     	        android:text="1234567890"
             />
         </TableRow>
+
+        <TableRow android:gravity="center" >
+
+            <TextView android:text="Nickname" />
+
+            <TextView
+                android:id="@+id/hostNickname"
+                android:text="" />
+        </TableRow>
         
         <TableRow android:gravity="center"> 
             <TextView

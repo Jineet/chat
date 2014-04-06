@@ -31,6 +31,13 @@ public interface ChatInterface {
      * out that this is a used as a signal emitter and is only called to send
      * signals and not to receive signals.
      */
+   
     @BusSignal
-    public void Chat(String str) throws BusException;
+    public void Notify(String str, String nickname, double key) throws BusException;
+    @BusSignal
+    public void nickname(String usrname , String all_unique)throws BusException;
+    @BusSignal
+    public void validate(boolean val)throws BusException;
+    @BusSignal
+    public void sendKey(Double a)throws BusException;
 }

@@ -15,8 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-		android:hint="channel name"
-    />
+        android:hint="channel name" />
     
     <LinearLayout
         android:orientation="horizontal"

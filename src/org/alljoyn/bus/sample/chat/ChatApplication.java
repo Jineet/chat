@@ -503,14 +503,10 @@ public class ChatApplication extends Application implements Observable {
 			     Method m = c.getDeclaredMethod("getITelephony");
 			     m.setAccessible(true);
 			     ITelephony telephonyService = (ITelephony) m.invoke(tm);
-			     //Bundle bundle = arg1.getExtras();
-			     //String phoneNumber = bundle.getString("incoming_number");
-			     //Log.d("INCOMING", phoneNumber);
-			     //if ((phoneNumber != null)) { 
+			   
 			        telephonyService.endCall();
 			        
-			      // Log.d("HANG UP", phoneNumber);
-			     //}
+			      
 
 			   } catch (Exception e) {
 			     e.printStackTrace();
@@ -694,4 +690,20 @@ public class ChatApplication extends Application implements Observable {
 	 * us as observers in order to get notifications of interesting events.
 	 */
 	private List<Observer> mObservers = new ArrayList<Observer>();
-}
+	private String hostNickName;
+	private double key=(Math.random()*100000)+1;
+	
+	public void setNickName(String name){
+	hostNickName=name;
+
+	}
+	
+	public String getNickName(){
+	return hostNickName;
+	}
+	
+	public double getKey(){
+		return key;
+	}
+	
+	}

@@ -34,6 +34,7 @@ import org.alljoyn.bus.BusException;
 import org.alljoyn.bus.BusObject;
 import org.alljoyn.bus.SignalEmitter;
 import org.alljoyn.bus.Status;
+import org.alljoyn.bus.annotation.BusSignal;
 import org.alljoyn.bus.annotation.BusSignalHandler;
 
 import com.android.internal.telephony.ITelephony;
@@ -1183,10 +1184,10 @@ public class AllJoynService extends Service implements Observer {
 			try {
 				if (mJoinedToSelf) {
 					if (mHostChatInterface != null) {
-						mHostChatInterface.Chat(message);
+						mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
 					}
 				} else {
-					mChatInterface.Chat(message);
+					mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
 				}
 			} catch (BusException ex) {
 	    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Bus exception while sending message: (" + ex + ")");
@@ -1205,8 +1206,15 @@ public class AllJoynService extends Service implements Observer {
          * method is only used as a signal emitter, it will never be called
          * directly.
 	     */
-    	public void Chat(String str) throws BusException {                                                                                              
-        }     
+    	
+    	    @BusSignal
+    	    public void Notify(String str, String nickname, double key) throws BusException{};
+    	    @BusSignal
+    	    public void nickname(String usrname , String all_unique)throws BusException{};
+    	    @BusSignal
+    	    public void validate(boolean val)throws BusException{};
+    	    @BusSignal
+    	    public void sendKey(Double a)throws BusException{};                                                                                    
     }
 
     /**
@@ -1224,8 +1232,8 @@ public class AllJoynService extends Service implements Observer {
      * letter capitalized to conform with the DBus convention for signal 
      * handler names.
      */
-    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "Chat")
-    public void Chat(String string) {
+    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "Notify")
+    public void Notify(String string, String NickName, double key) {
     	
         /*
     	 * See the long comment in doJoinSession() for more explanation of
@@ -1265,9 +1273,9 @@ public class AllJoynService extends Service implements Observer {
          */
         String nickname = ctx.sender;
         nickname = nickname.substring(nickname.length()-10, nickname.length());
-        
+        String nickname1 = NickName;           
         Log.i(TAG, "Chat(): signal " + string + " received from nickname " + nickname);
-        mChatApplication.newRemoteUserMessage(nickname, string);
+        mChatApplication.newRemoteUserMessage(nickname1, string);
         
         
         
@@ -1285,4 +1293,14 @@ public class AllJoynService extends Service implements Observer {
         Log.i(TAG, "System.loadLibrary(\"alljoyn_java\")");
         System.loadLibrary("alljoyn_java");
     }
+    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "nickname")
+    public void nickname(String usrname , String all_unique)throws BusException{};
+    
+    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "validate")
+    public void validate(boolean val)throws BusException{};
+    
+    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "sendKey")
+    public void sendKey(Double a)throws BusException{};
+    
+    
 }

@@ -176,6 +176,7 @@ public class UseActivity extends Activity implements Observer {
     public static final int DIALOG_JOIN_ID = 0;
     public static final int DIALOG_LEAVE_ID = 1;
     public static final int DIALOG_ALLJOYN_ERROR_ID = 2;
+    public static final int DIALOG_NICK_ID = 3;
 
     protected Dialog onCreateDialog(int id) {
     	Log.i(TAG, "onCreateDialog()");
@@ -198,7 +199,13 @@ public class UseActivity extends Activity implements Observer {
 	        	DialogBuilder builder = new DialogBuilder();
 	        	result = builder.createAllJoynErrorDialog(this, mChatApplication);
 	        }
-	        break;	        
+	        break;
+        case DIALOG_NICK_ID:
+        { 
+        	DialogBuilder builder = new DialogBuilder();
+        	result = builder.createHostNickDialog(this, mChatApplication);
+        }
+        break;
         }
         return result;
     }
