@@ -121,6 +121,7 @@ public class AllJoynService extends Service implements Observer {
         mBackgroundHandler.disconnect();
         stopBusThread();
         mChatApplication.deleteObserver(this);
+        mChatApplication.decCounter();
  	}
     
 	/**
@@ -908,6 +909,7 @@ public class AllJoynService extends Service implements Observer {
                 mHostSessionId = id;
                 SignalEmitter emitter = new SignalEmitter(mChatService, id, SignalEmitter.GlobalBroadcast.Off);
                 mHostChatInterface = emitter.getInterface(ChatInterface.class);
+                
             }             
         });
         
@@ -1183,11 +1185,13 @@ public class AllJoynService extends Service implements Observer {
              */
 			try {
 				if (mJoinedToSelf) {
-					if (mHostChatInterface != null) {
-						mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
+					if (mChatInterface != null) {
+						
+						mChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
 					}
 				} else {
-					mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
+					
+					mChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
 				}
 			} catch (BusException ex) {
 	    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Bus exception while sending message: (" + ex + ")");
@@ -1272,7 +1276,7 @@ public class AllJoynService extends Service implements Observer {
          * just use the unique name of the sender's bus attachment.
          */
         String nickname = ctx.sender;
-        nickname = nickname.substring(nickname.length()-10, nickname.length());
+        
         String nickname1 = NickName;           
         Log.i(TAG, "Chat(): signal " + string + " received from nickname " + nickname);
         mChatApplication.newRemoteUserMessage(nickname1, string);

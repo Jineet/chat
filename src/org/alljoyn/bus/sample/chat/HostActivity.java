@@ -27,11 +27,15 @@ import android.os.Message;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Intent;
 
 import android.view.View;
 
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import android.util.Log;
 
@@ -46,7 +50,7 @@ public class HostActivity extends Activity implements Observer {
         mChannelName = (TextView)findViewById(R.id.hostChannelName);
         mChannelName.setText("");
         
-        mChannelNick= (TextView)findViewById(R.id.hostNickname);
+       
        
         
         mChannelStatus = (TextView)findViewById(R.id.hostChannelStatus);
@@ -64,7 +68,18 @@ public class HostActivity extends Activity implements Observer {
         mStartButton.setEnabled(false);
         mStartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                showDialog(DIALOG_START_ID);
+            	if(mChatApplication.getCounter()==0){
+            	mChatApplication.setFlag(true);
+            	mChatApplication.incCounter(); 
+                 Intent intent = new Intent(HostActivity.this, AllJoynMasterService.class);
+                mRunningService1= startService(intent);
+                 if (mRunningService1 == null) {
+                     Log.i(TAG, "onCreate(): failed to startService()");
+                 }
+            	}
+            	showDialog(DIALOG_START_ID);
+                
+                
             }
         });
         
@@ -83,7 +98,7 @@ public class HostActivity extends Activity implements Observer {
          * required services are running.
          */
         mChatApplication = (ChatApplication)getApplication();
-        mChatApplication.checkin();
+        
         
         /*
          * Call down into the model to get its current state.  Since the model
@@ -177,7 +192,10 @@ public class HostActivity extends Activity implements Observer {
         }
     }
     
+    
+    
     public void updateChannelState() {
+    	if(mChatApplication.getFlag()==false){
     	AllJoynService.HostChannelState channelState = mChatApplication.hostGetChannelState();
     	String name = mChatApplication.hostGetChannelName();
     	
@@ -203,6 +221,7 @@ public class HostActivity extends Activity implements Observer {
             break;
         case CONNECTED:
             mChannelStatus.setText("Connected");
+           
             break;
         default:
             mChannelStatus.setText("Unknown");
@@ -222,16 +241,66 @@ public class HostActivity extends Activity implements Observer {
             mStartButton.setEnabled(false);
             mStopButton.setEnabled(true);
         }
+      }
+    	else{
+    		AllJoynMasterService.HostChannelState channelState = mChatApplication.hostGetChannelState1();
+        	String name = mChatApplication.hostGetChannelName();
+        	
+        	boolean haveName = true;
+        	if (name == null) {
+        		haveName = false;
+        		name = "Not set";
+        	}
+            mChannelName.setText(name);
+          
+            switch (channelState) {
+            case IDLE:
+                mChannelStatus.setText("Idle");
+                break;
+            case NAMED:
+                mChannelStatus.setText("Named");
+                break;
+            case BOUND:
+                mChannelStatus.setText("Bound");
+                break;
+            case ADVERTISED:
+                mChannelStatus.setText("Advertised");
+                break;
+            case CONNECTED:
+                mChannelStatus.setText("Connected");
+               
+                break;
+            default:
+                mChannelStatus.setText("Unknown");
+                break;
+            }
+            
+            if (channelState == AllJoynMasterService.HostChannelState.IDLE) {
+                mSetNameButton.setEnabled(true);
+                if (haveName) {
+                	mStartButton.setEnabled(true);
+                } else {
+                    mStartButton.setEnabled(false);
+                }
+                mStopButton.setEnabled(false);
+            } else {
+                mSetNameButton.setEnabled(false);
+                mStartButton.setEnabled(false);
+                mStopButton.setEnabled(true);
+            }
+    		
+    	}
     }
     
-    private void updateNick(){
-    	String nick=mChatApplication.getNickName();
-    	  mChannelNick.setText(nick);
-    }
+    
+    
+    
+   
+    
     
     private TextView mChannelName;
     private TextView mChannelStatus;
-    private TextView mChannelNick;
+   
     private Button mSetNameButton;
     private Button mStartButton;
     private Button mStopButton;
@@ -247,6 +316,7 @@ public class HostActivity extends Activity implements Observer {
     private static final int HANDLE_APPLICATION_QUIT_EVENT = 0;
     private static final int HANDLE_CHANNEL_STATE_CHANGED_EVENT = 1;
     private static final int HANDLE_ALLJOYN_ERROR_EVENT = 2;
+    public static ComponentName mRunningService1;
     
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {

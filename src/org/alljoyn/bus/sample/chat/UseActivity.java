@@ -25,6 +25,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +47,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.android.internal.telephony.ITelephony;
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
@@ -73,10 +76,22 @@ public class UseActivity extends Activity implements Observer {
                 return true;
             }
         });
-                
+        
+        
         mJoinButton = (Button)findViewById(R.id.useJoin);
         mJoinButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+            	if(mChatApplication.getFlag()==false){
+            		if(mChatApplication.getCounter()==0){
+            	Intent intent = new Intent(UseActivity.this, AllJoynService.class);
+                mRunningService= startService(intent);
+                mChatApplication.incCounter();
+                if (mRunningService == null) {
+                    Log.i(TAG, "onCreate(): failed to startService()");
+                }
+                }
+            }
+
                 showDialog(DIALOG_JOIN_ID);
         	}
         });
@@ -90,6 +105,7 @@ public class UseActivity extends Activity implements Observer {
         
         mChannelName = (TextView)findViewById(R.id.useChannelName);
         mChannelStatus = (TextView)findViewById(R.id.useChannelStatus);
+        mChannelNick= (TextView)findViewById(R.id.hostNickname);
         
         /*
          * Keep a pointer to the Android Appliation class around.  We use this
@@ -98,7 +114,7 @@ public class UseActivity extends Activity implements Observer {
          * required services are running.
          */
         mChatApplication = (ChatApplication)getApplication();
-        mChatApplication.checkin();
+       
         
         
         /*
@@ -244,28 +260,60 @@ public class UseActivity extends Activity implements Observer {
         }
 	    mHistoryList.notifyDataSetChanged();
     }
+    int interval = 5000; 
+    Handler handler = new Handler();
+    Runnable runnable = new Runnable(){
+        public void run() {
+        	
+        	updateNick();
+        }
+    };
     
     private void updateChannelState() {
         Log.i(TAG, "updateHistory()");
+        String name;
+        if(mChatApplication.getFlag()==false){
     	AllJoynService.UseChannelState channelState = mChatApplication.useGetChannelState();
-    	String name = mChatApplication.useGetChannelName();
+    	 name = mChatApplication.useGetChannelName();
+    	 switch (channelState) {
+         case IDLE:
+             mChannelStatus.setText("Idle");
+             mJoinButton.setEnabled(true);
+             mLeaveButton.setEnabled(false);
+             break;
+         case JOINED:
+             mChannelStatus.setText("Joined");
+             handler.postAtTime(runnable, System.currentTimeMillis()+interval);
+             mJoinButton.setEnabled(false);
+             mLeaveButton.setEnabled(true);
+             break;	
+         }
+        }
+        else
+        {
+        	AllJoynMasterService.UseChannelState channelState = mChatApplication.useGetChannelState1();
+        	 name = mChatApplication.useGetChannelName();
+        	 switch (channelState) {
+             case IDLE:
+                 mChannelStatus.setText("Idle");
+                 mJoinButton.setEnabled(true);
+                 mLeaveButton.setEnabled(false);
+                 break;
+             case JOINED:
+                 mChannelStatus.setText("Joined");
+                 handler.postAtTime(runnable, System.currentTimeMillis()+interval);
+                 mJoinButton.setEnabled(false);
+                 mLeaveButton.setEnabled(true);
+                 break;	
+             }
+        }
     	if (name == null) {
     		name = "Not set";
     	}
-        mChannelName.setText(name);
+       
+    	mChannelName.setText(name);
         
-        switch (channelState) {
-        case IDLE:
-            mChannelStatus.setText("Idle");
-            mJoinButton.setEnabled(true);
-            mLeaveButton.setEnabled(false);
-            break;
-        case JOINED:
-            mChannelStatus.setText("Joined");
-            mJoinButton.setEnabled(false);
-            mLeaveButton.setEnabled(true);
-            break;	
-        }
+        
     }
     
     /**
@@ -316,9 +364,14 @@ public class UseActivity extends Activity implements Observer {
             }
         }
     };
+    private void updateNick(){
+    	String nick=mChatApplication.getNickName();
+    	  mChannelNick.setText(nick);
+    }
+    
     
     private ChatApplication mChatApplication = null;
-    
+    private TextView mChannelNick;
     private ArrayAdapter<String> mHistoryList;
     
     private Button mJoinButton;
@@ -329,5 +382,7 @@ public class UseActivity extends Activity implements Observer {
     private TextView mChannelStatus;
     
     private TelephonyManager telManager; 
+    
+    public static ComponentName mRunningService;
 
 }

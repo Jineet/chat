@@ -92,16 +92,10 @@ public class ChatApplication extends Application implements Observable {
 	 * overall architecture.
 	 */
     public void onCreate() {
-        Log.i(TAG, "onCreate()");
-        PACKAGE_NAME = getApplicationContext().getPackageName();
-        Intent intent = new Intent(this, AllJoynService.class);
-        mRunningService = startService(intent);
-        if (mRunningService == null) {
-            Log.i(TAG, "onCreate(): failed to startService()");
-        }
+        
 	}
     
-    ComponentName mRunningService = null;
+   // ComponentName mRunningService = null;
     
     /**
      * Since our application is "rooted" in this class derived from Appliation
@@ -120,7 +114,10 @@ public class ChatApplication extends Application implements Observable {
      */
     public void quit() {
 		notifyObservers(APPLICATION_QUIT_EVENT);
-		mRunningService = null;
+		if(flag==false)
+		UseActivity.mRunningService = null;
+		else
+	    HostActivity.mRunningService1 = null;
     }
     
     /**
@@ -129,7 +126,7 @@ public class ChatApplication extends Application implements Observable {
      * Android Application class doesn't have an end to its lifecycle other
      * than through "kill -9".  See quit().
      */
-    public void checkin() {
+    /*public void checkin() {
         Log.i(TAG, "checkin()");
     	if (mRunningService == null) {
             Log.i(TAG, "checkin():  Starting the AllJoynService");
@@ -139,7 +136,7 @@ public class ChatApplication extends Application implements Observable {
                 Log.i(TAG, "checkin(): failed to startService()");
             }    		
     	}
-    }
+    } */
 	
     public static final String APPLICATION_QUIT_EVENT = "APPLICATION_QUIT_EVENT";
 		
@@ -270,6 +267,7 @@ public class ChatApplication extends Application implements Observable {
      * application, so this isn't terribly interesting.
 	 */
 	public AllJoynService.BusAttachmentState mBusAttachmentState = AllJoynService.BusAttachmentState.DISCONNECTED;
+	public AllJoynMasterService.BusAttachmentState mBusAttachmentState1 = AllJoynMasterService.BusAttachmentState.DISCONNECTED;
 
 	/**
 	 * Set the status of the "host" channel.  The AllJoyn Service part of the
@@ -281,11 +279,19 @@ public class ChatApplication extends Application implements Observable {
 		notifyObservers(HOST_CHANNEL_STATE_CHANGED_EVENT);
 	}
     
+	public synchronized void hostSetChannelState1(AllJoynMasterService.HostChannelState state) {
+		mHostChannelState1 = state;
+		notifyObservers(HOST_CHANNEL_STATE_CHANGED_EVENT);
+	}
 	/**
 	 * Get the state of the "use" channel. 
 	 */
 	public synchronized AllJoynService.HostChannelState hostGetChannelState() {
 		return mHostChannelState;
+	}
+	
+	public synchronized AllJoynMasterService.HostChannelState hostGetChannelState1() {
+		return mHostChannelState1;
 	}
 	/** 
      * The "host" state which reflects the state of the part of the system
@@ -294,7 +300,7 @@ public class ChatApplication extends Application implements Observable {
      * sample.
 	 */
 	private AllJoynService.HostChannelState mHostChannelState = AllJoynService.HostChannelState.IDLE;
-	
+	private AllJoynMasterService.HostChannelState mHostChannelState1 = AllJoynMasterService.HostChannelState.IDLE;
 	/**
 	 * Set the name part of the "host" channel.  Since we are going to "use" a
 	 * channel that is implemented remotely and discovered through an AllJoyn
@@ -339,11 +345,19 @@ public class ChatApplication extends Application implements Observable {
 		notifyObservers(USE_CHANNEL_STATE_CHANGED_EVENT);
 	}
     
+	public synchronized void useSetChannelState1(AllJoynMasterService.UseChannelState state) {
+		mUseChannelState1 = state;
+		notifyObservers(USE_CHANNEL_STATE_CHANGED_EVENT);
+	}
 	/**
 	 * Get the state of the "use" channel. 
 	 */
 	public synchronized AllJoynService.UseChannelState useGetChannelState() {
 		return mUseChannelState;
+	}
+	
+	public synchronized AllJoynMasterService.UseChannelState useGetChannelState1() {
+		return mUseChannelState1;
 	}
 	
 	/** 
@@ -353,7 +367,7 @@ public class ChatApplication extends Application implements Observable {
      * this sample.
 	 */
 	private AllJoynService.UseChannelState mUseChannelState = AllJoynService.UseChannelState.IDLE;
-	
+	private AllJoynMasterService.UseChannelState mUseChannelState1 = AllJoynMasterService.UseChannelState.IDLE;
 	/** 
      * The name of the "use" channel which the user has selected.
 	 */
@@ -480,8 +494,15 @@ public class ChatApplication extends Application implements Observable {
 	 */
 	public synchronized void newLocalUserMessage(String message) {
 		addInboundItem("Me", message);
+		if(flag==false){
 		if (useGetChannelState() == AllJoynService.UseChannelState.JOINED) {
 			addOutboundItem(message);
+		}
+	  }
+		else{
+			if (useGetChannelState1() == AllJoynMasterService.UseChannelState.JOINED) {
+				addOutboundItem(message);
+			}
 		}
 	}
 	
@@ -652,6 +673,7 @@ public class ChatApplication extends Application implements Observable {
         Log.i(TAG, "addObserver(" + obs + ")");
 		if (mObservers.indexOf(obs) < 0) {
 			mObservers.add(obs);
+			
 		}
 	}
 	
@@ -690,7 +712,17 @@ public class ChatApplication extends Application implements Observable {
 	 * us as observers in order to get notifications of interesting events.
 	 */
 	private List<Observer> mObservers = new ArrayList<Observer>();
-	private String hostNickName;
+	public List<String> Nicks= new ArrayList<String>();
+	private boolean flag=false;
+	
+	public void setFlag(boolean b){
+		flag=b;
+	}
+	
+	public boolean getFlag(){
+		return flag;
+	}
+	private String hostNickName= "IamWeird";
 	private double key=(Math.random()*100000)+1;
 	
 	public void setNickName(String name){
@@ -706,4 +738,15 @@ public class ChatApplication extends Application implements Observable {
 		return key;
 	}
 	
+	private int counter=0;
+	public void incCounter(){
+		counter=1;
+	}
+	
+	public void decCounter(){
+		counter=0;
+	}
+	public int getCounter(){
+		return counter;
+	}
 	}
