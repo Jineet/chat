@@ -40,4 +40,6 @@ public interface ChatInterface {
     public void validate(boolean val)throws BusException;
     @BusSignal
     public void sendKey(Double a)throws BusException;
+    @BusSignal
+    public void askKey(String name)throws BusException;
 }

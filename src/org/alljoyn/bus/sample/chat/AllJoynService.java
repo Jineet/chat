@@ -22,6 +22,7 @@ import org.alljoyn.bus.sample.chat.TabWidget;
 import org.alljoyn.bus.sample.chat.Observable;
 import org.alljoyn.bus.sample.chat.Observer;
 import org.alljoyn.bus.sample.chat.ChatInterface;
+import org.alljoyn.bus.sample.chat.AllJoynMasterService.MethodHandler;
 
 import org.alljoyn.bus.BusAttachment;
 import org.alljoyn.bus.BusListener;
@@ -58,11 +59,12 @@ import android.content.Intent;
 
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Button;
 
 @TargetApi(Build.VERSION_CODES.ECLAIR)
 public class AllJoynService extends Service implements Observer {
 	private static final String TAG = "chat.AllJoynService";
-
+   
 	/**
 	 * We don't use the bindery to communiate between any client and this
 	 * service so we return null.
@@ -103,6 +105,10 @@ public class AllJoynService extends Service implements Observer {
          * remote channel instances in the background while the rest of the app
          * is starting up. 
          */
+        for(int i=0;i<100;i++){
+        	keys[i]=-1;
+        }
+        
         mBackgroundHandler.connect();
         mBackgroundHandler.startDiscovery();
  	}
@@ -742,6 +748,13 @@ public class AllJoynService extends Service implements Observer {
     		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register signal handlers: (" + status + ")");
         	return;
     	}
+    	
+    	MethodHandler mySampleService = new MethodHandler();
+   	 status = mBus.registerBusObject(mySampleService, OBJECT_PATH);
+   	 if (status != Status.OK) {
+	    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register method handler object: (" + status + ")");
+	        	return;
+	    	}
         
     	mBusAttachmentState = BusAttachmentState.CONNECTED;
     }  
@@ -1218,7 +1231,9 @@ public class AllJoynService extends Service implements Observer {
     	    @BusSignal
     	    public void validate(boolean val)throws BusException{};
     	    @BusSignal
-    	    public void sendKey(Double a)throws BusException{};                                                                                    
+    	    public void sendKey(Double a)throws BusException{};
+    	    @BusSignal
+    	    public void askKey(String name)throws BusException{};
     }
 
     /**
@@ -1237,7 +1252,7 @@ public class AllJoynService extends Service implements Observer {
      * handler names.
      */
     @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "Notify")
-    public void Notify(String string, String NickName, double key) {
+    public void Notify(String string, String NickName, double key1) {
     	
         /*
     	 * See the long comment in doJoinSession() for more explanation of
@@ -1249,6 +1264,15 @@ public class AllJoynService extends Service implements Observer {
     	 * locally echo the signal.
 
      	 */
+    	Boolean key_exist = false;
+        for (int i = 0; i < 100; i++) {
+            if (keys[i] == key1) {
+                key_exist = true;
+                break;
+            } else if (keys[i] == -1) {
+                break;
+            }
+        }
     	String uniqueName = mBus.getUniqueName();
     	MessageContext ctx = mBus.getMessageContext();
         Log.i(TAG, "Chat(): use sessionId is " + mUseSessionId);
@@ -1279,7 +1303,9 @@ public class AllJoynService extends Service implements Observer {
         
         String nickname1 = NickName;           
         Log.i(TAG, "Chat(): signal " + string + " received from nickname " + nickname);
+        if (key_exist || key1 == 0 || mChatApplication.getKey() == key1) {
         mChatApplication.newRemoteUserMessage(nickname1, string);
+        }
         
         
         
@@ -1301,10 +1327,30 @@ public class AllJoynService extends Service implements Observer {
     public void nickname(String usrname , String all_unique)throws BusException{};
     
     @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "validate")
-    public void validate(boolean val)throws BusException{};
+    public void validate(boolean val)throws BusException{
+    	validate=val;
+    };
     
     @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "sendKey")
-    public void sendKey(Double a)throws BusException{};
+    public void sendKey(Double a)throws BusException{
+    	keys[key_count] = a;
+        key_count++;
+    };
+    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "askKey")
+    public void askKey(String name) throws BusException{
+    	SignalEmitter emitter = new SignalEmitter(mChatService, name, mHostSessionId, SignalEmitter.GlobalBroadcast.Off);
+        ChatInterface usrInterface = emitter.getInterface(ChatInterface.class);
+        Double key= mChatApplication.getKey();
+        usrInterface.sendKey(key);
+        
+    }    
     
+    
+    private static double[] keys = new double[100];
+    //stores the all the keys it has recieved
+    private static int key_count = 0;
+    private static boolean validate=false;
+    
+  
     
 }

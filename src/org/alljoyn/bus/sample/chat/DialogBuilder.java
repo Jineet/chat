@@ -19,6 +19,7 @@ package org.alljoyn.bus.sample.chat;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.ComponentName;
 
 import android.view.KeyEvent;
 import android.view.View;
@@ -266,4 +267,22 @@ public class DialogBuilder {
     	
     	return dialog;
     }
+    
+    public Dialog createHostSelectDeviceDialog(Activity activity, final ChatApplication application) {
+       	Log.i(TAG, "createAllJoynErrorDialog()");
+    	final Dialog dialog = new Dialog(activity);
+    	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
+    	dialog.setContentView(R.layout.hostselectdevicedialog);
+    	
+    	
+    	Button ok = (Button)dialog.findViewById(R.id.findSelected);
+    	ok.setOnClickListener(new View.OnClickListener() {
+    		public void onClick(View view) {
+    			dialog.cancel();
+    		}
+    	});
+    	
+    	return dialog;
+    }
+    
 }

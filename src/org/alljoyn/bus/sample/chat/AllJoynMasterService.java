@@ -1,6 +1,7 @@
 package org.alljoyn.bus.sample.chat;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import org.alljoyn.bus.sample.chat.ChatApplication;
 import org.alljoyn.bus.sample.chat.TabWidget;
@@ -89,6 +90,9 @@ public class AllJoynMasterService extends Service implements Observer {
 	         * remote channel instances in the background while the rest of the app
 	         * is starting up. 
 	         */
+	        for(int i=0;i<100;i++){
+	        	keys[i]=-1;
+	        }
 	        mBackgroundHandler.connect();
 	        mBackgroundHandler.startDiscovery();
 	 	}
@@ -729,6 +733,13 @@ public class AllJoynMasterService extends Service implements Observer {
 	    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register signal handlers: (" + status + ")");
 	        	return;
 	    	}
+	    	
+	    	 MethodHandler mySampleService = new MethodHandler();
+	    	 status = mBus.registerBusObject(mySampleService, OBJECT_PATH);
+	    	 if (status != Status.OK) {
+		    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register method handler object: (" + status + ")");
+		        	return;
+		    	}
 	        
 	    	mBusAttachmentState = BusAttachmentState.CONNECTED;
 	    }  
@@ -896,6 +907,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	                mHostSessionId = id;
 	                SignalEmitter emitter = new SignalEmitter(mChatService, id, SignalEmitter.GlobalBroadcast.Off);
 	                mHostChatInterface = emitter.getInterface(ChatInterface.class);
+	                
 	            }             
 	        });
 	        
@@ -1202,7 +1214,9 @@ public class AllJoynMasterService extends Service implements Observer {
 	    	    @BusSignal
 	    	    public void validate(boolean val)throws BusException{};
 	    	    @BusSignal
-	    	    public void sendKey(Double a)throws BusException{};                                                                                    
+	    	    public void sendKey(Double a)throws BusException{}; 
+	    	    @BusSignal
+	    	    public void askKey(String name)throws BusException{};
 	    }
 
 	    /**
@@ -1222,7 +1236,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	     */
 	    
 	    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "Notify")
-	    public void Notify(String string, String NickName, double key) {
+	    public void Notify(String string, String NickName, double key1) {
 	    	
 	        /*
 	    	 * See the long comment in doJoinSession() for more explanation of
@@ -1234,6 +1248,15 @@ public class AllJoynMasterService extends Service implements Observer {
 	    	 * locally echo the signal.
 
 	     	 */
+	    	Boolean key_exist = false;
+	        for (int i = 0; i < 100; i++) {
+	            if (keys[i] == key1) {
+	                key_exist = true;
+	                break;
+	            } else if (keys[i] == -1) {
+	                break;
+	            }
+	        }
 	    	String uniqueName = mBus.getUniqueName();
 	    	MessageContext ctx = mBus.getMessageContext();
 	        Log.i(TAG, "Chat(): use sessionId is " + mUseSessionId);
@@ -1264,8 +1287,9 @@ public class AllJoynMasterService extends Service implements Observer {
 	        nickname = nickname.substring(nickname.length()-10, nickname.length());
 	        String nickname1 = NickName;           
 	        Log.i(TAG, "Chat(): signal " + string + " received from nickname " + nickname);
+	        if (key_exist || key1 == 0 || mChatApplication.getKey() == key1) {
 	        mChatApplication.newRemoteUserMessage(nickname1, string);
-	        
+	        }
 	        
 	        
 	    }
@@ -1282,14 +1306,67 @@ public class AllJoynMasterService extends Service implements Observer {
 	        System.loadLibrary("alljoyn_java");
 	    }
 	    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "nickname")
-	    public void nickname(String usrname , String all_unique)throws BusException{};
+	    public void nickname(String usrname , String all_unique)throws BusException{
+	    	SignalEmitter emitter = new SignalEmitter(mChatService, all_unique, mHostSessionId, SignalEmitter.GlobalBroadcast.Off);
+            ChatInterface usrInterface = emitter.getInterface(ChatInterface.class);
+            if (!nicks.contains(usrname)) {
+                nicks.add(usrname);
+                uniNames.add(all_unique);
+                usrInterface.validate(true);
+
+            } else {
+                usrInterface.validate(false);
+            }
+	    };
 	    
 	    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "validate")
 	    public void validate(boolean val)throws BusException{};
 	    
 	    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "sendKey")
-	    public void sendKey(Double a)throws BusException{};
+	    public void sendKey(Double a)throws BusException{
+	    	keys[key_count] = a;
+            key_count++;
+	    };
+	    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "askKey")
+        public void askKey(String name) throws BusException{
+	    	SignalEmitter emitter = new SignalEmitter(mChatService, name, mHostSessionId, SignalEmitter.GlobalBroadcast.Off);
+            ChatInterface usrInterface = emitter.getInterface(ChatInterface.class);
+            Double key= mChatApplication.getKey();
+            usrInterface.sendKey(key);
+            
+	    }
 	    
+	    private static ArrayList<String> uniNames = new ArrayList<String>();
+	    private static ArrayList<String> nicks = new ArrayList<String>();
+	    
+	    public static class MethodHandler implements GroupInterface, BusObject {
+	   
+	    	public void preDispatch() {
+	        }
+
+	        public void postDispatch() {
+	        }
+	    	
+	    	public synchronized String[] getMem() throws BusException {
+	    		String[] temp = new String[nicks.size()];
+	            for (int i = 0; i < nicks.size(); i++) {
+	                temp[i] = nicks.get(i);
+	            }
+	            return temp;
+	    	}
+	    	
+	    	public synchronized String[] getUni() throws BusException {
+            String[] temp = new String[uniNames.size()];
+            for (int i = 0; i < uniNames.size(); i++) {
+                temp[i] = uniNames.get(i);
+            }
+            return temp;
+        }
+	   }
+	    
+	    private static double[] keys = new double[100];               //stores the all the keys it has recieved
+	    private static int key_count = 0;
+	
 	    
 	    
 	}
