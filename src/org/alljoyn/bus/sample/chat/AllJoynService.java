@@ -16,17 +16,20 @@
 package org.alljoyn.bus.sample.chat;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.alljoyn.bus.sample.chat.ChatApplication;
 import org.alljoyn.bus.sample.chat.TabWidget;
 import org.alljoyn.bus.sample.chat.Observable;
 import org.alljoyn.bus.sample.chat.Observer;
 import org.alljoyn.bus.sample.chat.ChatInterface;
-import org.alljoyn.bus.sample.chat.AllJoynMasterService.MethodHandler;
+
 
 import org.alljoyn.bus.BusAttachment;
 import org.alljoyn.bus.BusListener;
 import org.alljoyn.bus.MessageContext;
+import org.alljoyn.bus.ProxyBusObject;
 import org.alljoyn.bus.SessionListener;
 import org.alljoyn.bus.SessionPortListener;
 import org.alljoyn.bus.Mutable;
@@ -105,6 +108,7 @@ public class AllJoynService extends Service implements Observer {
          * remote channel instances in the background while the rest of the app
          * is starting up. 
          */
+        keys=new double [100];
         for(int i=0;i<100;i++){
         	keys[i]=-1;
         }
@@ -152,7 +156,7 @@ public class AllJoynService extends Service implements Observer {
      * A reference to a descendent of the Android Application class that is
      * acting as the Model of our MVC-based application.
      */
-     private ChatApplication mChatApplication = null;
+     private static ChatApplication mChatApplication = null;
 	
     /**
      * This is the event handler for the Observable/Observed design pattern.
@@ -601,6 +605,9 @@ public class AllJoynService extends Service implements Observer {
     private static final int LEAVE_SESSION = 13;
     private static final int SEND_MESSAGES = 14;
     
+    
+    
+    
     /**
      * The instance of the AllJoyn background thread handler.  It is created
      * when Android decides the Service is needed and is called from the
@@ -633,7 +640,7 @@ public class AllJoynService extends Service implements Observer {
      * clients.  Pretty much all communiation with AllJoyn is going to go through
      * this obejct.
      */
-    private BusAttachment mBus  = new BusAttachment(ChatApplication.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
+    private static BusAttachment mBus  = new BusAttachment(ChatApplication.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
     
     /**
      * The well-known name prefix which all bus attachments hosting a channel
@@ -749,12 +756,7 @@ public class AllJoynService extends Service implements Observer {
         	return;
     	}
     	
-    	MethodHandler mySampleService = new MethodHandler();
-   	 status = mBus.registerBusObject(mySampleService, OBJECT_PATH);
-   	 if (status != Status.OK) {
-	    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register method handler object: (" + status + ")");
-	        	return;
-	    	}
+    
         
     	mBusAttachmentState = BusAttachmentState.CONNECTED;
     }  
@@ -956,7 +958,7 @@ public class AllJoynService extends Service implements Observer {
      * The session identifier of the "host" session that the application
      * provides for remote devices.  Set to -1 if not connected.
      */
-    int mHostSessionId = -1;
+    static int mHostSessionId = -1;
     
     /**
      * A flag indicating that the application has joined a chat channel that
@@ -1145,7 +1147,10 @@ public class AllJoynService extends Service implements Observer {
         
         SignalEmitter emitter = new SignalEmitter(mChatService, mUseSessionId, SignalEmitter.GlobalBroadcast.Off);
         mChatInterface = emitter.getInterface(ChatInterface.class);
-        
+        Log.i(TAG, "mChatInterface set");
+        mProxyObj = mBus.getProxyBusObject(wellKnownName, "/chatService", sessionId.value, new Class<?>[] {GroupInterface.class});
+        mGroupInterface = mProxyObj.getInterface(GroupInterface.class);
+       
      	mUseChannelState = UseChannelState.JOINED;
       	mChatApplication.useSetChannelState(mUseChannelState);
     }
@@ -1153,7 +1158,7 @@ public class AllJoynService extends Service implements Observer {
     /**
      * This is the interface over which the chat messages will be sent.
      */
-    ChatInterface mChatInterface = null;
+    static ChatInterface mChatInterface = null;
     
     /**
      * Implementation of the functionality related to joining an existing
@@ -1168,13 +1173,17 @@ public class AllJoynService extends Service implements Observer {
         mJoinedToSelf = false;
      	mUseChannelState = UseChannelState.IDLE;
       	mChatApplication.useSetChannelState(mUseChannelState);
+      	for(int i=0;i<100;i++){
+      		keys[i]=0;
+      	}
+       key_count=0;
     }
     
     /**
      * The session identifier of the "use" session that the application
      * uses to talk to remote instances.  Set to -1 if not connectecd.
      */
-    int mUseSessionId = -1;
+    static int mUseSessionId = -1;
     
     /**
      * Implementation of the functionality related to sending messages out over
@@ -1198,9 +1207,9 @@ public class AllJoynService extends Service implements Observer {
              */
 			try {
 				if (mJoinedToSelf) {
-					if (mChatInterface != null) {
+					if (mHostChatInterface != null) {
 						
-						mChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
+						mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
 					}
 				} else {
 					
@@ -1217,7 +1226,7 @@ public class AllJoynService extends Service implements Observer {
      * associated session.  In order to send signals, we need to define an
      * AllJoyn bus object that will allow us to instantiate a signal emmiter.
      */
-    class ChatService implements ChatInterface, BusObject {
+    static class ChatService implements ChatInterface, BusObject {
     	/**                                                                                                                          
          * Intentionally empty implementation of Chat method.  Since this
          * method is only used as a signal emitter, it will never be called
@@ -1240,7 +1249,7 @@ public class AllJoynService extends Service implements Observer {
      * The ChatService is the instance of an AllJoyn interface that is exported
      * on the bus and allows us to send signals implementing messages
      */
-    private ChatService mChatService = new ChatService();
+    private static ChatService mChatService = new AllJoynService.ChatService();
 
     /**
      * The signal handler for messages received from the AllJoyn bus.
@@ -1338,7 +1347,7 @@ public class AllJoynService extends Service implements Observer {
     };
     @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "askKey")
     public void askKey(String name) throws BusException{
-    	SignalEmitter emitter = new SignalEmitter(mChatService, name, mHostSessionId, SignalEmitter.GlobalBroadcast.Off);
+    	SignalEmitter emitter = new SignalEmitter(mChatService, name, mUseSessionId, SignalEmitter.GlobalBroadcast.Off);
         ChatInterface usrInterface = emitter.getInterface(ChatInterface.class);
         Double key= mChatApplication.getKey();
         usrInterface.sendKey(key);
@@ -1346,11 +1355,31 @@ public class AllJoynService extends Service implements Observer {
     }    
     
     
-    private static double[] keys = new double[100];
+    public static void sendNick(String name) throws BusException{
+    	mChatInterface.nickname(name , mBus.getUniqueName());  
+    }
+    
+    public static void sendKeys(ArrayList<String> s) throws BusException{
+    	 ArrayList<String> mem =new ArrayList<String>(Arrays.asList(memArray));
+    	 ArrayList<String> uni =new ArrayList<String>(Arrays.asList(uniArray));
+    	 for(int i=0;i<s.size();i++){
+    		 String name=(uni.get(mem.indexOf(s.get(i)))).toString();
+    		 SignalEmitter emitter = new SignalEmitter(mChatService, name, mUseSessionId, SignalEmitter.GlobalBroadcast.Off);
+    	     ChatInterface usrInterface = emitter.getInterface(ChatInterface.class);
+    	     Double key= mChatApplication.getKey();
+    	     usrInterface.sendKey(key);
+    	 }
+    }
+    
+  
+    private static double[] keys;
+    
     //stores the all the keys it has recieved
     private static int key_count = 0;
     private static boolean validate=false;
-    
-  
-    
+    public static String[] memArray;
+    public static String[] uniArray;
+    public static GroupInterface mGroupInterface;
+    private static ProxyBusObject mProxyObj;
+    public static String[] Members;
 }

@@ -20,22 +20,34 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
+import android.content.Context;
 
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import android.os.Build;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import org.alljoyn.bus.BusException;
+
+
+
 
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class DialogBuilder {
@@ -172,8 +184,27 @@ public class DialogBuilder {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 	String name = view.getText().toString();
-                	
+                	if(AllJoynMasterService.nicks.contains(name)){
+                		Toast.makeText(null, "Please enter another nick",
+                				   Toast.LENGTH_SHORT).show();
+                		dialog.cancel();
+                		
+                    	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
+                    	dialog.setContentView(R.layout.hostnickdialog);
+                	}
                 	application.setNickName(name);
+                	if(application.getFlag()==false){
+                		try {
+							AllJoynService.sendNick(name);
+						} catch (BusException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+                	}
+                	else
+                	{
+                		AllJoynMasterService.nicks.add(name);
+                	}
     				//validate method to be called here
                 	dialog.cancel();
                 }
@@ -185,8 +216,27 @@ public class DialogBuilder {
         okay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	String name = channel.getText().toString();
-            	
+            	if(AllJoynMasterService.nicks.contains(name)){
+            		Toast.makeText(null, "Please enter another nick",
+            				   Toast.LENGTH_SHORT).show();
+            		dialog.cancel();
+            		
+                	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
+                	dialog.setContentView(R.layout.hostnickdialog);
+            	}
             	application.setNickName(name);
+            	if(application.getFlag()==false){
+            		try {
+						AllJoynService.sendNick(name);
+					} catch (BusException e) {
+					
+						e.printStackTrace();
+					}
+            	}
+            	else
+            	{
+            		AllJoynMasterService.nicks.add(name);
+            	}
 				//validate method to be called here
     			dialog.cancel();
             }
@@ -268,21 +318,5 @@ public class DialogBuilder {
     	return dialog;
     }
     
-    public Dialog createHostSelectDeviceDialog(Activity activity, final ChatApplication application) {
-       	Log.i(TAG, "createAllJoynErrorDialog()");
-    	final Dialog dialog = new Dialog(activity);
-    	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
-    	dialog.setContentView(R.layout.hostselectdevicedialog);
-    	
-    	
-    	Button ok = (Button)dialog.findViewById(R.id.findSelected);
-    	ok.setOnClickListener(new View.OnClickListener() {
-    		public void onClick(View view) {
-    			dialog.cancel();
-    		}
-    	});
-    	
-    	return dialog;
-    }
     
 }

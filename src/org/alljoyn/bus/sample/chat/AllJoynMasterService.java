@@ -2,6 +2,7 @@ package org.alljoyn.bus.sample.chat;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.alljoyn.bus.sample.chat.ChatApplication;
 import org.alljoyn.bus.sample.chat.TabWidget;
@@ -90,6 +91,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	         * remote channel instances in the background while the rest of the app
 	         * is starting up. 
 	         */
+	    	keys=new double[100];
 	        for(int i=0;i<100;i++){
 	        	keys[i]=-1;
 	        }
@@ -137,7 +139,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	     * A reference to a descendent of the Android Application class that is
 	     * acting as the Model of our MVC-based application.
 	     */
-	     private ChatApplication mChatApplication = null;
+	     private static ChatApplication mChatApplication = null;
 		
 	    /**
 	     * This is the event handler for the Observable/Observed design pattern.
@@ -941,7 +943,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	     * The session identifier of the "host" session that the application
 	     * provides for remote devices.  Set to -1 if not connected.
 	     */
-	    int mHostSessionId = -1;
+	    static int mHostSessionId = -1;
 	    
 	    /**
 	     * A flag indicating that the application has joined a chat channel that
@@ -1117,6 +1119,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	        		mChatApplication.alljoynError(ChatApplication.Module.USE, "The chat session has been lost");
 	             	mUseChannelState = UseChannelState.IDLE;
 	              	mChatApplication.useSetChannelState1(mUseChannelState);
+	              
 	            }
 	        });
 	        
@@ -1130,6 +1133,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	        
 	        SignalEmitter emitter = new SignalEmitter(mChatService, mUseSessionId, SignalEmitter.GlobalBroadcast.Off);
 	        mChatInterface = emitter.getInterface(ChatInterface.class);
+	        uniNames.add(mBus.getUniqueName());
 	        
 	     	mUseChannelState = UseChannelState.JOINED;
 	      	mChatApplication.useSetChannelState1(mUseChannelState);
@@ -1153,6 +1157,10 @@ public class AllJoynMasterService extends Service implements Observer {
 	        mJoinedToSelf = false;
 	     	mUseChannelState = UseChannelState.IDLE;
 	      	mChatApplication.useSetChannelState1(mUseChannelState);
+	      	for(int i=0;i<100;i++){
+	      		keys[i]=0;
+	      	}
+	       key_count=0;
 	    }
 	    
 	    /**
@@ -1200,7 +1208,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	     * associated session.  In order to send signals, we need to define an
 	     * AllJoyn bus object that will allow us to instantiate a signal emmiter.
 	     */
-	    class ChatService implements ChatInterface, BusObject {
+	    static class ChatService implements ChatInterface, BusObject {
 	    	/**                                                                                                                          
 	         * Intentionally empty implementation of Chat method.  Since this
 	         * method is only used as a signal emitter, it will never be called
@@ -1223,7 +1231,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	     * The ChatService is the instance of an AllJoyn interface that is exported
 	     * on the bus and allows us to send signals implementing messages
 	     */
-	    private ChatService mChatService = new ChatService();
+	    private static ChatService mChatService = new ChatService();
 
 	    /**
 	     * The signal handler for messages received from the AllJoyn bus.
@@ -1336,8 +1344,8 @@ public class AllJoynMasterService extends Service implements Observer {
             
 	    }
 	    
-	    private static ArrayList<String> uniNames = new ArrayList<String>();
-	    private static ArrayList<String> nicks = new ArrayList<String>();
+	    public static ArrayList<String> uniNames = new ArrayList<String>();
+	    public static ArrayList<String> nicks = new ArrayList<String>();
 	    
 	    public static class MethodHandler implements GroupInterface, BusObject {
 	   
@@ -1364,7 +1372,18 @@ public class AllJoynMasterService extends Service implements Observer {
         }
 	   }
 	    
-	    private static double[] keys = new double[100];               //stores the all the keys it has recieved
+	    public static void sendKeys(ArrayList<String> s) throws BusException{
+	    	
+	    	 for(int i=0;i<s.size();i++){
+	    		 String name=(uniNames.get(nicks.indexOf(s.get(i)))).toString();
+	    		 SignalEmitter emitter = new SignalEmitter(mChatService, name, mHostSessionId, SignalEmitter.GlobalBroadcast.Off);
+	    	     ChatInterface usrInterface = emitter.getInterface(ChatInterface.class);
+	    	     Double key= mChatApplication.getKey();
+	    	     usrInterface.sendKey(key);
+	    	 }
+	    }
+	    
+	    private static double[] keys;               //stores the all the keys it has recieved
 	    private static int key_count = 0;
 	
 	    
