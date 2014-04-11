@@ -203,6 +203,7 @@ public class DialogBuilder {
                 	}
                 	else
                 	{
+                		if(!AllJoynMasterService.nicks.contains(name))
                 		AllJoynMasterService.nicks.add(name);
                 	}
     				//validate method to be called here

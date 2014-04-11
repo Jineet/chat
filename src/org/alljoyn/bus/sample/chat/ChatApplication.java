@@ -723,6 +723,7 @@ public class ChatApplication extends Application implements Observable {
 		return flag;
 	}
 	private String hostNickName= "IamWeird";
+	
 	private double key=(Math.random()*100000)+1;
 	
 	public void setNickName(String name){

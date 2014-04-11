@@ -1016,6 +1016,8 @@ public class AllJoynMasterService extends Service implements Observer {
 	     */
 	    private void doJoinSession() {
 	        Log.i(TAG, "doJoinSession()");
+	        if(!uniNames.contains(mBus.getUniqueName()))
+		        uniNames.add(mBus.getUniqueName());
 	        
 	        /*
 	         * There is a relatively non-intuitive behavior of multipoint sessions
@@ -1133,7 +1135,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	        
 	        SignalEmitter emitter = new SignalEmitter(mChatService, mUseSessionId, SignalEmitter.GlobalBroadcast.Off);
 	        mChatInterface = emitter.getInterface(ChatInterface.class);
-	        uniNames.add(mBus.getUniqueName());
+	       
 	        
 	     	mUseChannelState = UseChannelState.JOINED;
 	      	mChatApplication.useSetChannelState1(mUseChannelState);
