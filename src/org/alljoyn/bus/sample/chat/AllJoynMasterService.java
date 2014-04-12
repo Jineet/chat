@@ -69,7 +69,7 @@ public class AllJoynMasterService extends Service implements Observer {
 		 * get event notifications. 
 		 */
 		public void onCreate() {
-	        Log.i(TAG, "onCreate()");
+	        Log.i(TAG, "master onCreate()");
 	        startBusThread();
 	        mChatApplication = (ChatApplication)getApplication();
 	        mChatApplication.addObserver(this);
@@ -263,6 +263,14 @@ public class AllJoynMasterService extends Service implements Observer {
 		        case HANDLE_HOST_STOP_CHANNEL_EVENT:
 		            {
 		                Log.i(TAG, "mHandler.handleMessage(): HOST_STOP_CHANNEL_EVENT");
+		                for(int i=0;i<100;i++){
+		    	      		keys[i]=0;
+		    	      	}
+		    	       key_count=0;
+		    	       nicks=null;
+		    	       uniNames=null;
+		    	       
+		    	       onDestroy();
 		                mBackgroundHandler.cancelAdvertise();
 		                mBackgroundHandler.unbindSession();
 		                mBackgroundHandler.releaseName();
@@ -1159,10 +1167,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	        mJoinedToSelf = false;
 	     	mUseChannelState = UseChannelState.IDLE;
 	      	mChatApplication.useSetChannelState1(mUseChannelState);
-	      	for(int i=0;i<100;i++){
-	      		keys[i]=0;
-	      	}
-	       key_count=0;
+	      	
 	    }
 	    
 	    /**

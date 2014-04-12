@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -55,6 +56,12 @@ public class DialogBuilder {
     
     public Dialog createUseJoinDialog(final Activity activity, final ChatApplication application) {
     	Log.i(TAG, "createUseJoinDialog()");
+    	Handler handler = new Handler(); 
+        handler.postDelayed(new Runnable() { 
+             public void run() { 
+                   
+             } 
+        }, 2000);
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
     	dialog.setContentView(R.layout.usejoindialog);
@@ -94,6 +101,7 @@ public class DialogBuilder {
     	Button cancel = (Button)dialog.findViewById(R.id.useJoinCancel);
     	cancel.setOnClickListener(new View.OnClickListener() {
     		public void onClick(View view) {
+    			application.useLeaveChannel();
 				/*
 				 * Android likes to reuse dialogs for performance reasons.  If
 				 * we reuse this one, the list of channels will eventually be
@@ -184,14 +192,7 @@ public class DialogBuilder {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 	String name = view.getText().toString();
-                	if(AllJoynMasterService.nicks.contains(name)){
-                		Toast.makeText(null, "Please enter another nick",
-                				   Toast.LENGTH_SHORT).show();
-                		dialog.cancel();
-                		
-                    	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
-                    	dialog.setContentView(R.layout.hostnickdialog);
-                	}
+                	
                 	application.setNickName(name);
                 	if(application.getFlag()==false){
                 		try {
@@ -217,14 +218,7 @@ public class DialogBuilder {
         okay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	String name = channel.getText().toString();
-            	if(AllJoynMasterService.nicks.contains(name)){
-            		Toast.makeText(null, "Please enter another nick",
-            				   Toast.LENGTH_SHORT).show();
-            		dialog.cancel();
-            		
-                	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
-                	dialog.setContentView(R.layout.hostnickdialog);
-            	}
+            	
             	application.setNickName(name);
             	if(application.getFlag()==false){
             		try {

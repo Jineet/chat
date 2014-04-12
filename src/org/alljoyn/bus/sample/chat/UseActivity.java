@@ -81,11 +81,18 @@ public class UseActivity extends Activity implements Observer {
         mJoinButton = (Button)findViewById(R.id.useJoin);
         mJoinButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+            	
+            	
             	if(mChatApplication.getFlag()==false){
+            		Log.i(TAG,"chatapplication flag is " + mChatApplication.getFlag());
             		if(mChatApplication.getCounter()==0){
+            	Log.i(TAG,"chatapplication counter is " + mChatApplication.getCounter());
             	Intent intent = new Intent(UseActivity.this, AllJoynService.class);
+            	Log.i(TAG,"intent called");
                 mRunningService= startService(intent);
+                Log.i(TAG,"startService called");
                 mChatApplication.incCounter();
+                 
                 if (mRunningService == null) {
                     Log.i(TAG, "onCreate(): failed to startService()");
                 }

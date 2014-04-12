@@ -713,7 +713,7 @@ public class ChatApplication extends Application implements Observable {
 	 */
 	private List<Observer> mObservers = new ArrayList<Observer>();
 	public List<String> Nicks= new ArrayList<String>();
-	private boolean flag=false;
+	private boolean flag= false;
 	
 	public void setFlag(boolean b){
 		flag=b;

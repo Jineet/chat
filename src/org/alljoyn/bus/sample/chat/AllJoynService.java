@@ -86,7 +86,7 @@ public class AllJoynService extends Service implements Observer {
 	 * get event notifications. 
 	 */
 	public void onCreate() {
-        Log.i(TAG, "onCreate()");
+        Log.i(TAG, " client service onCreate()");
         startBusThread();
         mChatApplication = (ChatApplication)getApplication();
         mChatApplication.addObserver(this);
@@ -115,6 +115,7 @@ public class AllJoynService extends Service implements Observer {
         
         mBackgroundHandler.connect();
         mBackgroundHandler.startDiscovery();
+        name_me();
  	}
 	
     private static final int NOTIFICATION_ID = 0xdefaced;
@@ -132,6 +133,7 @@ public class AllJoynService extends Service implements Observer {
         stopBusThread();
         mChatApplication.deleteObserver(this);
         mChatApplication.decCounter();
+        
  	}
     
 	/**
@@ -640,7 +642,7 @@ public class AllJoynService extends Service implements Observer {
      * clients.  Pretty much all communiation with AllJoyn is going to go through
      * this obejct.
      */
-    private static BusAttachment mBus  = new BusAttachment(ChatApplication.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
+    private BusAttachment mBus  = new BusAttachment(ChatApplication.PACKAGE_NAME, BusAttachment.RemoteMessage.Receive);
     
     /**
      * The well-known name prefix which all bus attachments hosting a channel
@@ -1032,6 +1034,7 @@ public class AllJoynService extends Service implements Observer {
     private void doJoinSession() {
         Log.i(TAG, "doJoinSession()");
         
+        
         /*
          * There is a relatively non-intuitive behavior of multipoint sessions
          * that one needs to grok in order to understand the code below.  The
@@ -1177,6 +1180,9 @@ public class AllJoynService extends Service implements Observer {
       		keys[i]=0;
       	}
        key_count=0;
+       memArray=null;
+       uniArray=null;
+       onDestroy();
     }
     
     /**
@@ -1354,9 +1360,12 @@ public class AllJoynService extends Service implements Observer {
         
     }    
     
-    
+    private static String uni_name;
+    public void name_me(){
+    	uni_name= mBus.getUniqueName();
+    }
     public static void sendNick(String name) throws BusException{
-    	mChatInterface.nickname(name , mBus.getUniqueName());  
+    	mChatInterface.nickname(name , uni_name);  
     }
     
     public static void sendKeys(ArrayList<String> s) throws BusException{

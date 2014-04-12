@@ -112,7 +112,7 @@ public class HostActivity extends Activity implements Observer {
         mChatApplication = (ChatApplication)getApplication();
         
         mSelectButton = (Button)findViewById(R.id.hostSelect);
-        mSelectButton.setEnabled(false);
+        mSelectButton.setEnabled(true);
         mSelectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showDialog(DIALOG_SELECT_ID);
@@ -269,12 +269,12 @@ public class HostActivity extends Activity implements Observer {
                 mStartButton.setEnabled(false);
             }
             mStopButton.setEnabled(false);
-            mSelectButton.setEnabled(false);
+            
         } else {
             mSetNameButton.setEnabled(false);
             mStartButton.setEnabled(false);
             mStopButton.setEnabled(true);
-            mSelectButton.setEnabled(true);
+            
         }
       }
     	else{
@@ -318,12 +318,12 @@ public class HostActivity extends Activity implements Observer {
                     mStartButton.setEnabled(false);
                 }
                 mStopButton.setEnabled(false);
-                mSelectButton.setEnabled(false);
+                
             } else {
                 mSetNameButton.setEnabled(false);
                 mStartButton.setEnabled(false);
                 mStopButton.setEnabled(true);
-                mSelectButton.setEnabled(true);
+                
             }
     		
     	}
