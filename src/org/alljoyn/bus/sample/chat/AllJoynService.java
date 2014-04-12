@@ -1182,7 +1182,8 @@ public class AllJoynService extends Service implements Observer {
        key_count=0;
        memArray=null;
        uniArray=null;
-       onDestroy();
+       this.stopSelf();
+       //onDestroy();
     }
     
     /**

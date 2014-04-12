@@ -49,7 +49,7 @@ import android.util.Log;
 @TargetApi(Build.VERSION_CODES.ECLAIR)
 public class AllJoynMasterService extends Service implements Observer {
 	
-		private static final String TAG = "chat.AllJoynService";
+		private static final String TAG = "chat.AllJoynMasterService";
 
 		/**
 		 * We don't use the bindery to communiate between any client and this
@@ -95,6 +95,8 @@ public class AllJoynMasterService extends Service implements Observer {
 	        for(int i=0;i<100;i++){
 	        	keys[i]=-1;
 	        }
+	        uniNames=new ArrayList<String>();
+	        nicks=new ArrayList<String>();
 	        mBackgroundHandler.connect();
 	        mBackgroundHandler.startDiscovery();
 	 	}
@@ -108,13 +110,15 @@ public class AllJoynMasterService extends Service implements Observer {
 		 * model. 
 		 */
 		public void onDestroy() {
-	        Log.i(TAG, "onDestroy()");
-	        mBackgroundHandler.cancelDiscovery();
-	        mBackgroundHandler.disconnect();
-	        stopBusThread();
+	        Log.i(TAG, "onDestroy() alljoyn master");
+	        //mBackgroundHandler.cancelDiscovery();
+	        //
 	        mChatApplication.deleteObserver(this);
 	        mChatApplication.setFlag(false);
 	        mChatApplication.decCounter();
+	        mBus=null;
+	        //stopBusThread();
+	        
 	 	}
 	    
 		/**
@@ -267,13 +271,13 @@ public class AllJoynMasterService extends Service implements Observer {
 		    	      		keys[i]=0;
 		    	      	}
 		    	       key_count=0;
-		    	       nicks=null;
-		    	       uniNames=null;
 		    	       
-		    	       onDestroy();
+		    	        
 		                mBackgroundHandler.cancelAdvertise();
 		                mBackgroundHandler.unbindSession();
 		                mBackgroundHandler.releaseName();
+		                mBackgroundHandler.disconnect();
+		                
 		            }
 		            break;
 		        case HANDLE_OUTBOUND_CHANGED_EVENT:
@@ -728,18 +732,24 @@ public class AllJoynMasterService extends Service implements Observer {
 	         */
 	        Status status = mBus.registerBusObject(mChatService, OBJECT_PATH);
 	        if (Status.OK != status) {
+	        	if(mBus==null){
+	        		Log.i(TAG, "doConnect() connect fuck you ass");
+	        	}
+	        	Log.i(TAG, "Unable to register the chat bus object: (" + status + ")");
 	    		mChatApplication.alljoynError(ChatApplication.Module.HOST, "Unable to register the chat bus object: (" + status + ")");
 	        	return;
 	        }
 	    	
 	    	status = mBus.connect();
 	    	if (status != Status.OK) {
+	    		Log.i(TAG, "doConnect() connect not happening2");
 	    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to connect to the bus: (" + status + ")");
 	        	return;
 	    	}
 	    	
 	        status = mBus.registerSignalHandlers(this);
 	    	if (status != Status.OK) {
+	    		Log.i(TAG, "doConnect() connect not happening3");
 	    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register signal handlers: (" + status + ")");
 	        	return;
 	    	}
@@ -747,6 +757,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	    	 MethodHandler mySampleService = new MethodHandler();
 	    	 status = mBus.registerBusObject(mySampleService, OBJECT_PATH);
 	    	 if (status != Status.OK) {
+	    		 Log.i(TAG, "doConnect() connect not happening4");
 		    		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register method handler object: (" + status + ")");
 		        	return;
 		    	}
@@ -766,7 +777,9 @@ public class AllJoynMasterService extends Service implements Observer {
 	    	assert(mBusAttachmentState == BusAttachmentState.CONNECTED);
 	    	mBus.unregisterBusListener(mBusListener);
 	    	mBus.disconnect();
+	    	mBus.unregisterBusObject(mChatService);
 			mBusAttachmentState = BusAttachmentState.DISCONNECTED;
+			this.stopSelf();
 	    	return true;
 	    }
 	    
@@ -864,6 +877,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	    	mBus.releaseName(wellKnownName);
 	    	mHostChannelState = HostChannelState.IDLE;
 	      	mChatApplication.hostSetChannelState1(mHostChannelState);
+	      	
 	    }
 	    
 	    /**
@@ -917,7 +931,13 @@ public class AllJoynMasterService extends Service implements Observer {
 	                mHostSessionId = id;
 	                SignalEmitter emitter = new SignalEmitter(mChatService, id, SignalEmitter.GlobalBroadcast.Off);
 	                mHostChatInterface = emitter.getInterface(ChatInterface.class);
-	                
+	                mBus.setSessionListener(id, new SessionListener(){ 
+	                	public void sessionMemberRemoved(int sessionId, String uniqueName){
+	                		uniNames.remove(uniNames.indexOf(uniqueName));
+	                		nicks.remove(uniNames.indexOf(uniqueName));
+	                	}
+	                		
+	                });
 	            }             
 	        });
 	        
@@ -1024,6 +1044,9 @@ public class AllJoynMasterService extends Service implements Observer {
 	     */
 	    private void doJoinSession() {
 	        Log.i(TAG, "doJoinSession()");
+	        if(uniNames==null){
+	        	Log.i(TAG, "doJoinSession() get lost");
+	        }
 	        if(!uniNames.contains(mBus.getUniqueName()))
 		        uniNames.add(mBus.getUniqueName());
 	        

@@ -34,6 +34,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.ContactsContract.PhoneLookup;
 import android.telephony.PhoneStateListener;
@@ -207,25 +208,25 @@ public class UseActivity extends Activity implements Observer {
         switch(id) {
         case DIALOG_JOIN_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder();
+	        	DialogBuilder builder = new DialogBuilder(mHandler);
 	        	result = builder.createUseJoinDialog(this, mChatApplication);
 	        }        	
         	break;
         case DIALOG_LEAVE_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder();
+	        	DialogBuilder builder = new DialogBuilder(mHandler);
 	        	result = builder.createUseLeaveDialog(this, mChatApplication);
 	        }
 	        break;
         case DIALOG_ALLJOYN_ERROR_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder();
+	        	DialogBuilder builder = new DialogBuilder(mHandler);
 	        	result = builder.createAllJoynErrorDialog(this, mChatApplication);
 	        }
 	        break;
         case DIALOG_NICK_ID:
         { 
-        	DialogBuilder builder = new DialogBuilder();
+        	DialogBuilder builder = new DialogBuilder(mHandler);
         	result = builder.createHostNickDialog(this, mChatApplication);
         }
         break;
@@ -338,8 +339,9 @@ public class UseActivity extends Activity implements Observer {
     private static final int HANDLE_HISTORY_CHANGED_EVENT = 1;
     private static final int HANDLE_CHANNEL_STATE_CHANGED_EVENT = 2;
     private static final int HANDLE_ALLJOYN_ERROR_EVENT = 3;
+    public static final int HANDLE_NICK_CHANGE_EVENT= 4 ;
     
-    private Handler mHandler = new Handler() {
+    public Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case HANDLE_APPLICATION_QUIT_EVENT:
@@ -366,12 +368,19 @@ public class UseActivity extends Activity implements Observer {
 	                alljoynError();
 	                break;
 	            }
+            case HANDLE_NICK_CHANGE_EVENT :
+            {
+                Log.i(TAG, "mHandler.handleMessage(): HANDLE_NICK_CHANGE_EVENT");
+                updateNick();
+                break;
+            }
             default:
                 break;
             }
         }
     };
     private void updateNick(){
+    	Log.i(TAG,"updateNick() called");
     	String nick=mChatApplication.getNickName();
     	  mChannelNick.setText(nick);
     }

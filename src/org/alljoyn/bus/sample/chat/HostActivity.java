@@ -28,6 +28,7 @@ import org.alljoyn.bus.sample.chat.DialogBuilder;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import android.app.Activity;
@@ -112,7 +113,7 @@ public class HostActivity extends Activity implements Observer {
         mChatApplication = (ChatApplication)getApplication();
         
         mSelectButton = (Button)findViewById(R.id.hostSelect);
-        mSelectButton.setEnabled(true);
+        mSelectButton.setEnabled(false);
         mSelectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showDialog(DIALOG_SELECT_ID);
@@ -168,25 +169,25 @@ public class HostActivity extends Activity implements Observer {
         switch(id) {
         case DIALOG_SET_NAME_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder();
+	        	DialogBuilder builder = new DialogBuilder(mHandler);
 	        	result = builder.createHostNameDialog(this, mChatApplication);
 	        }  
         	break;
         case DIALOG_START_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder();
+	        	DialogBuilder builder = new DialogBuilder(mHandler);
 	        	result = builder.createHostStartDialog(this, mChatApplication);
 	        } 
             break;
         case DIALOG_STOP_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder();
+	        	DialogBuilder builder = new DialogBuilder(mHandler);
 	        	result = builder.createHostStopDialog(this, mChatApplication);
 	        }
 	        break;
 	    case DIALOG_ALLJOYN_ERROR_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder();
+	        	DialogBuilder builder = new DialogBuilder(mHandler);
 	        	result = builder.createAllJoynErrorDialog(this, mChatApplication);
 	        }
 	        break;	      
@@ -223,6 +224,11 @@ public class HostActivity extends Activity implements Observer {
             Message message = mHandler.obtainMessage(HANDLE_ALLJOYN_ERROR_EVENT);
             mHandler.sendMessage(message);
         }
+        if (qualifier.equals(ChatApplication.USE_CHANNEL_STATE_CHANGED_EVENT)) {
+            Message message = mHandler.obtainMessage(HANDLE_USE_CHANNEL_STATE_CHANGED_EVENT);
+            mHandler.sendMessage(message);
+        }
+        
     }
     
     
@@ -354,9 +360,10 @@ public class HostActivity extends Activity implements Observer {
     private static final int HANDLE_APPLICATION_QUIT_EVENT = 0;
     private static final int HANDLE_CHANNEL_STATE_CHANGED_EVENT = 1;
     private static final int HANDLE_ALLJOYN_ERROR_EVENT = 2;
+    private static final int HANDLE_USE_CHANNEL_STATE_CHANGED_EVENT=3;
     public static ComponentName mRunningService1;
     
-    private Handler mHandler = new Handler() {
+    public Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
 	            case HANDLE_APPLICATION_QUIT_EVENT:
@@ -376,7 +383,13 @@ public class HostActivity extends Activity implements Observer {
                 Log.i(TAG, "mHandler.handleMessage(): HANDLE_ALLJOYN_ERROR_EVENT");
                 alljoynError();
             }
-            break;                
+            break;
+            case HANDLE_USE_CHANNEL_STATE_CHANGED_EVENT :
+            {
+                Log.i(TAG, "mHandler.handleMessage(): HANDLE_ALLJOYN_ERROR_EVENT");
+                mSelectButton.setEnabled(true);
+            }
+            break;
             default:
                 break;
             }

@@ -712,7 +712,7 @@ public class ChatApplication extends Application implements Observable {
 	 * us as observers in order to get notifications of interesting events.
 	 */
 	private List<Observer> mObservers = new ArrayList<Observer>();
-	public List<String> Nicks= new ArrayList<String>();
+	
 	private boolean flag= false;
 	
 	public void setFlag(boolean b){

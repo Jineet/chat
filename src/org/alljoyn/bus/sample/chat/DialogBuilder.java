@@ -39,6 +39,8 @@ import android.widget.Toast;
 
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -53,15 +55,12 @@ import org.alljoyn.bus.BusException;
 @TargetApi(Build.VERSION_CODES.CUPCAKE)
 public class DialogBuilder {
     private static final String TAG = "chat.Dialogs";
-    
+    public DialogBuilder(Handler handler){
+    	mHandler=handler;
+    }
     public Dialog createUseJoinDialog(final Activity activity, final ChatApplication application) {
     	Log.i(TAG, "createUseJoinDialog()");
-    	Handler handler = new Handler(); 
-        handler.postDelayed(new Runnable() { 
-             public void run() { 
-                   
-             } 
-        }, 2000);
+    	
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
     	dialog.setContentView(R.layout.usejoindialog);
@@ -101,7 +100,9 @@ public class DialogBuilder {
     	Button cancel = (Button)dialog.findViewById(R.id.useJoinCancel);
     	cancel.setOnClickListener(new View.OnClickListener() {
     		public void onClick(View view) {
+    			if(application.getFlag()==false){
     			application.useLeaveChannel();
+    			}
 				/*
 				 * Android likes to reuse dialogs for performance reasons.  If
 				 * we reuse this one, the list of channels will eventually be
@@ -180,7 +181,8 @@ public class DialogBuilder {
     }
     
     
-    public Dialog createHostNickDialog(Activity activity, final ChatApplication application) {
+    
+    public Dialog createHostNickDialog(final Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostNameDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -192,8 +194,17 @@ public class DialogBuilder {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 	String name = view.getText().toString();
-                	
+                	if(name==null){
+                		dialog.cancel();
+                		Toast.makeText(activity, "Please set nickname!!" ,
+             				   Toast.LENGTH_SHORT).show();
+                		return true;
+                	}
                 	application.setNickName(name);
+                	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
+                    mHandler.sendMessage(message);
+                    Log.i(TAG,"Handler message"+message);
+                    
                 	if(application.getFlag()==false){
                 		try {
 							AllJoynService.sendNick(name);
@@ -220,6 +231,10 @@ public class DialogBuilder {
             	String name = channel.getText().toString();
             	
             	application.setNickName(name);
+            	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
+                mHandler.sendMessage(message);
+                Log.i(TAG,"Handler message"+message);
+                
             	if(application.getFlag()==false){
             		try {
 						AllJoynService.sendNick(name);
@@ -313,5 +328,5 @@ public class DialogBuilder {
     	return dialog;
     }
     
-    
+   Handler mHandler;
 }
