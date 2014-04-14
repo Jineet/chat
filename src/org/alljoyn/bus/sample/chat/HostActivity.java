@@ -113,7 +113,7 @@ public class HostActivity extends Activity implements Observer {
         mChatApplication = (ChatApplication)getApplication();
         
         mSelectButton = (Button)findViewById(R.id.hostSelect);
-        mSelectButton.setEnabled(false);
+        mSelectButton.setEnabled(true);
         mSelectButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showDialog(DIALOG_SELECT_ID);
@@ -386,7 +386,7 @@ public class HostActivity extends Activity implements Observer {
             break;
             case HANDLE_USE_CHANNEL_STATE_CHANGED_EVENT :
             {
-                Log.i(TAG, "mHandler.handleMessage(): HANDLE_ALLJOYN_ERROR_EVENT");
+                Log.i(TAG, "mHandler.handleMessage(): HANDLE_USE_CHANNEL_STATE_CHANGE");
                 mSelectButton.setEnabled(true);
             }
             break;

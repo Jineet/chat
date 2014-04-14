@@ -742,18 +742,21 @@ public class AllJoynService extends Service implements Observer {
          */
         Status status = mBus.registerBusObject(mChatService, OBJECT_PATH);
         if (Status.OK != status) {
+        	Log.i(TAG, "Unable to register the chat bus object: (" + status + ")");
     		mChatApplication.alljoynError(ChatApplication.Module.HOST, "Unable to register the chat bus object: (" + status + ")");
         	return;
         }
     	
     	status = mBus.connect();
     	if (status != Status.OK) {
+    		Log.i(TAG, "Unable to register the chat bus object: (" + status + ")");
     		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to connect to the bus: (" + status + ")");
         	return;
     	}
     	
         status = mBus.registerSignalHandlers(this);
     	if (status != Status.OK) {
+    		Log.i(TAG, "Unable to register the chat bus object: (" + status + ")");
     		mChatApplication.alljoynError(ChatApplication.Module.GENERAL, "Unable to register signal handlers: (" + status + ")");
         	return;
     	}
@@ -774,6 +777,7 @@ public class AllJoynService extends Service implements Observer {
         Log.i(TAG, "doDisonnect()");
     	assert(mBusAttachmentState == BusAttachmentState.CONNECTED);
     	mBus.unregisterBusListener(mBusListener);
+    	mBus.unregisterBusObject(mChatService);
     	mBus.disconnect();
 		mBusAttachmentState = BusAttachmentState.DISCONNECTED;
     	return true;

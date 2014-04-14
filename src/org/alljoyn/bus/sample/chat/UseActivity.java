@@ -268,14 +268,7 @@ public class UseActivity extends Activity implements Observer {
         }
 	    mHistoryList.notifyDataSetChanged();
     }
-    int interval = 5000; 
-    Handler handler = new Handler();
-    Runnable runnable = new Runnable(){
-        public void run() {
-        	
-        	updateNick();
-        }
-    };
+   
     
     private void updateChannelState() {
         Log.i(TAG, "updateHistory()");
@@ -291,7 +284,7 @@ public class UseActivity extends Activity implements Observer {
              break;
          case JOINED:
              mChannelStatus.setText("Joined");
-             handler.postAtTime(runnable, System.currentTimeMillis()+interval);
+        
              mJoinButton.setEnabled(false);
              mLeaveButton.setEnabled(true);
              break;	
@@ -309,7 +302,7 @@ public class UseActivity extends Activity implements Observer {
                  break;
              case JOINED:
                  mChannelStatus.setText("Joined");
-                 handler.postAtTime(runnable, System.currentTimeMillis()+interval);
+               
                  mJoinButton.setEnabled(false);
                  mLeaveButton.setEnabled(true);
                  break;	
