@@ -163,7 +163,8 @@ public class HostActivity extends Activity implements Observer {
     static final int DIALOG_STOP_ID = 2;
     public static final int DIALOG_ALLJOYN_ERROR_ID = 3;
     static final int DIALOG_SELECT_ID=4;
-
+    public static final int DIALOG_NICK1_ID=5;
+    
     protected Dialog onCreateDialog(int id) {
         Log.i(TAG, "onCreateDialog()");
         Dialog result = null;
@@ -201,7 +202,15 @@ public class HostActivity extends Activity implements Observer {
 				e.printStackTrace();
 			}
         }
-        break;	
+        break;
+	    case DIALOG_NICK1_ID:
+        { 
+        	
+        	    DialogBuilder builder = new DialogBuilder(mHandler);
+				result = builder.createHostNickDialog1(this, mChatApplication);
+			
+        }
+        break;
         }
         
         return result;

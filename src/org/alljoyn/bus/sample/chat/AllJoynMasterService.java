@@ -99,6 +99,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	        nicks=new ArrayList<String>();
 	        mBackgroundHandler.connect();
 	        mBackgroundHandler.startDiscovery();
+	        
 	 	}
 		
 	    private static final int NOTIFICATION_ID = 0xdefaced;
@@ -1006,6 +1007,8 @@ public class AllJoynMasterService extends Service implements Observer {
 	        if (status == Status.OK) {
 	        	mHostChannelState = HostChannelState.ADVERTISED;
 	          	mChatApplication.hostSetChannelState1(mHostChannelState);
+	          	mChatApplication.useSetChannelName(mChatApplication.hostGetChannelName());
+				mChatApplication.useJoinChannel();
 	        } else {
 	    		mChatApplication.alljoynError(ChatApplication.Module.HOST, "Unable to advertise well-known name: (" + status + ")");
 	        	return;

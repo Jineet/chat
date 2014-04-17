@@ -186,7 +186,7 @@ public class DialogBuilder {
     
     
     public Dialog createHostNickDialog(final Activity activity, final ChatApplication application) {
-       	Log.i(TAG, "createHostNameDialog()");
+       	Log.i(TAG, "createHostNickDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
     	dialog.setContentView(R.layout.hostnickdialog);
@@ -197,12 +197,28 @@ public class DialogBuilder {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 	String name = view.getText().toString();
-           /*     	if(name==null){
+                	ArrayList<String> selectedDevices;
+                	String[] selD=null;
+                	if(application.getFlag()==false){
+                	try {
+						 selD= AllJoynService.mGroupInterface.getMem();
+					     } catch (BusException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					    }
+                	     selectedDevices= new ArrayList<String>(Arrays.asList(selD));
+                	}
+                	else{
+                		selectedDevices= new ArrayList<String>();
+                	}
+               	    if(selectedDevices.contains(name)){
                 		Dialog d= createNickErrorDialog(activity);
                 		d.show();
-                		return true;
-                	} */
-                	
+                		application.useLeaveChannel();
+            			application.useSetChannelName("Not set");
+            			dialog.cancel();
+                	} 
+               	    else{
                 	application.setNickName(name);
                 	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
                     mHandler.sendMessage(message);
@@ -223,6 +239,7 @@ public class DialogBuilder {
                 	}
     				//validate method to be called here
                 	dialog.cancel();
+               	    }
                 }
                 return true;
             }
@@ -232,11 +249,28 @@ public class DialogBuilder {
         okay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	String name = channel.getText().toString();
-            /*	if(name==null){
+            	ArrayList<String> selectedDevices;
+            	String[] selD=null;
+            	if(application.getFlag()==false){
+            	try {
+					 selD= AllJoynService.mGroupInterface.getMem();
+				     } catch (BusException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				    }
+            	     selectedDevices= new ArrayList<String>(Arrays.asList(selD));
+            	}
+            	else{
+            		selectedDevices= new ArrayList<String>();
+            	}
+            	if(selectedDevices.contains(name)){
             		Dialog d= createNickErrorDialog(activity);
             		d.show();
-            		return;
-            	} */
+            		application.useLeaveChannel();
+        			application.useSetChannelName("Not set");
+        			dialog.cancel();
+            	} 
+            	else{
             	application.setNickName(name);
             	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
                 mHandler.sendMessage(message);
@@ -256,6 +290,7 @@ public class DialogBuilder {
             	}
 				//validate method to be called here
     			dialog.cancel();
+            	}
             }
         });
         
@@ -268,7 +303,7 @@ public class DialogBuilder {
         
         return dialog;
     }
-    public Dialog createHostStartDialog(Activity activity, final ChatApplication application) {
+    public Dialog createHostStartDialog(final Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostStartDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -278,6 +313,7 @@ public class DialogBuilder {
     	yes.setOnClickListener(new View.OnClickListener() {
     		public void onClick(View view) {
     			application.hostStartChannel();
+    			activity.showDialog(HostActivity.DIALOG_NICK1_ID);
     			dialog.cancel();
     		}
     	});
@@ -353,6 +389,82 @@ public class DialogBuilder {
     	
     	return dialog;
     } 
+    
+    public Dialog createHostNickDialog1(Activity activity, final ChatApplication application) {
+       	Log.i(TAG, "createHostNickDialog()");
+    	final Dialog dialog = new Dialog(activity);
+    	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
+    	dialog.setContentView(R.layout.hostnickdialog);
+    	
+        final EditText channel = (EditText)dialog.findViewById(R.id.editTextNick);
+        
+        channel.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
+                	String name = view.getText().toString();
+                	
+                	application.setNickName(name);
+                	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
+                    mHandler.sendMessage(message);
+                    Log.i(TAG,"Handler message"+message);
+                    
+                	if(application.getFlag()==false){
+                		try {
+							AllJoynService.sendNick(name);
+						} catch (BusException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+                	}
+                	else
+                	{
+                		if(!AllJoynMasterService.nicks.contains(name))
+                		AllJoynMasterService.nicks.add(name);
+                	}
+    				//validate method to be called here
+                	dialog.cancel();
+               	    }
+                
+                return true;
+            }
+        });
+    	
+        Button okay = (Button)dialog.findViewById(R.id.buttonOkNick);
+        okay.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+            	String name = channel.getText().toString();
+            	application.setNickName(name);
+            	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
+                mHandler.sendMessage(message);
+                Log.i(TAG,"Handler message"+message);
+                
+            	if(application.getFlag()==false){
+            		try {
+						AllJoynService.sendNick(name);
+					} catch (BusException e) {
+					
+						e.printStackTrace();
+					}
+            	}
+            	else
+            	{
+            		AllJoynMasterService.nicks.add(name);
+            	}
+				//validate method to be called here
+    			dialog.cancel();
+            	
+            }
+        });
+        
+        Button cancel = (Button)dialog.findViewById(R.id.buttonOkNick2);
+        cancel.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                dialog.cancel();
+            }
+        });
+        
+        return dialog;
+    }
     
    Handler mHandler;
 }
