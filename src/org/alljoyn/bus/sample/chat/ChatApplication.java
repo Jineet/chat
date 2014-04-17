@@ -253,7 +253,7 @@ public class ChatApplication extends Application implements Observable {
 	 * "join channel" dialog, whereupon she will choose one.  This will
 	 * eventually result in a joinSession call out from the AllJoyn Service 
 	 */
-	private List<String> mChannels = new ArrayList<String>();
+	public static List<String> mChannels = new ArrayList<String>();
     
     /**
      * The application has three ideas about the state of its channels.  This

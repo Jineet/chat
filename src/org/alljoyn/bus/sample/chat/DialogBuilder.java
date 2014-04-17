@@ -58,8 +58,11 @@ public class DialogBuilder {
     public DialogBuilder(Handler handler){
     	mHandler=handler;
     }
-    public Dialog createUseJoinDialog(final Activity activity, final ChatApplication application) {
+    public Dialog createUseJoinDialog(final Activity activity, final ChatApplication application)  {
+    	
     	Log.i(TAG, "createUseJoinDialog()");
+    	
+    	
     	
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -194,12 +197,12 @@ public class DialogBuilder {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 	String name = view.getText().toString();
-                	if(name==null){
-                		dialog.cancel();
-                		Toast.makeText(activity, "Please set nickname!!" ,
-             				   Toast.LENGTH_SHORT).show();
+           /*     	if(name==null){
+                		Dialog d= createNickErrorDialog(activity);
+                		d.show();
                 		return true;
-                	}
+                	} */
+                	
                 	application.setNickName(name);
                 	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
                     mHandler.sendMessage(message);
@@ -229,7 +232,11 @@ public class DialogBuilder {
         okay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	String name = channel.getText().toString();
-            	
+            /*	if(name==null){
+            		Dialog d= createNickErrorDialog(activity);
+            		d.show();
+            		return;
+            	} */
             	application.setNickName(name);
             	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
                 mHandler.sendMessage(message);
@@ -327,6 +334,25 @@ public class DialogBuilder {
     	
     	return dialog;
     }
+   
+    public Dialog createNickErrorDialog(Activity activity) {
+       	Log.i(TAG, "createAllJoynErrorDialog()");
+    	final Dialog dialog = new Dialog(activity);
+    	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
+    	dialog.setContentView(R.layout.hostnickokdialog);
+    	
+    	TextView errorText = (TextView)dialog.findViewById(R.id.textView1);
+        
+	        	       	
+    	Button yes = (Button)dialog.findViewById(R.id.button1);
+    	yes.setOnClickListener(new View.OnClickListener() {
+    		public void onClick(View view) {
+    			dialog.cancel();
+    		}
+    	});
+    	
+    	return dialog;
+    } 
     
    Handler mHandler;
 }

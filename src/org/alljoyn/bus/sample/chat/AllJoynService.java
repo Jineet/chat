@@ -1183,6 +1183,9 @@ public class AllJoynService extends Service implements Observer {
       	for(int i=0;i<100;i++){
       		keys[i]=0;
       	}
+      	
+           
+      	
        key_count=0;
        memArray=null;
        uniArray=null;

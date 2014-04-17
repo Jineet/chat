@@ -99,7 +99,7 @@ public class UseActivity extends Activity implements Observer {
                 }
                 }
             }
-
+            	
                 showDialog(DIALOG_JOIN_ID);
         	}
         });
@@ -201,16 +201,18 @@ public class UseActivity extends Activity implements Observer {
     public static final int DIALOG_LEAVE_ID = 1;
     public static final int DIALOG_ALLJOYN_ERROR_ID = 2;
     public static final int DIALOG_NICK_ID = 3;
-
+    
+    
     protected Dialog onCreateDialog(int id) {
     	Log.i(TAG, "onCreateDialog()");
-        Dialog result = null;
+    	Dialog result = null;
         switch(id) {
         case DIALOG_JOIN_ID:
 	        { 
-	        	DialogBuilder builder = new DialogBuilder(mHandler);
-	        	result = builder.createUseJoinDialog(this, mChatApplication);
-	        }        	
+	        	 DialogBuilder builder = new DialogBuilder(mHandler);
+	        	 result = builder.createUseJoinDialog(this, mChatApplication);
+	        	
+	         }        	
         	break;
         case DIALOG_LEAVE_ID:
 	        { 

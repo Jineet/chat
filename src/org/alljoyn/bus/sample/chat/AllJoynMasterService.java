@@ -933,8 +933,9 @@ public class AllJoynMasterService extends Service implements Observer {
 	                mHostChatInterface = emitter.getInterface(ChatInterface.class);
 	                mBus.setSessionListener(id, new SessionListener(){ 
 	                	public void sessionMemberRemoved(int sessionId, String uniqueName){
-	                		uniNames.remove(uniNames.indexOf(uniqueName));
 	                		nicks.remove(uniNames.indexOf(uniqueName));
+	                		uniNames.remove(uniNames.indexOf(uniqueName));
+	                		
 	                	}
 	                		
 	                });

@@ -38,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -401,8 +402,23 @@ public class HostActivity extends Activity implements Observer {
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
     	dialog.setContentView(R.layout.hostselectdevicedialog);
-    	displayListView(application, dialog);
     	
+    	if(application.getFlag()==false){
+    	if(application.useGetChannelState()!=AllJoynService.UseChannelState.JOINED){
+    	Toast toast=Toast.makeText(this,"Please join a channel first", Toast.LENGTH_SHORT);
+		 toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 10);
+		 toast.show();
+    		return null;
+         }
+    	}
+    	else{
+    		if(application.useGetChannelState1()!=AllJoynMasterService.UseChannelState.JOINED){
+    	    	Toast toast=Toast.makeText(this,"Please join a channel first", Toast.LENGTH_SHORT);
+    			 toast.setGravity(Gravity.TOP|Gravity.CENTER_HORIZONTAL, 0, 10);
+    			 toast.show();
+    	    		return null;
+    	         }
+    	}
     	Button ok = (Button)dialog.findViewById(R.id.findSelected);
     	ok.setOnClickListener(new View.OnClickListener() {
     		public void onClick(View view) {
@@ -426,21 +442,26 @@ public class HostActivity extends Activity implements Observer {
     			dialog.cancel();
     		}
     	});
-    	
+    	displayListView(application, dialog);
     	return dialog;
     }
     
     private void displayListView(ChatApplication application, Dialog d) throws BusException{
     	ArrayList<String> selectedDevices;
     	if(application.getFlag()==false){
+    	 
     		String[] selD= AllJoynService.mGroupInterface.getMem();
     		AllJoynService.uniArray= AllJoynService.mGroupInterface.getUni();
     		AllJoynService.memArray=selD;
     		
     		selectedDevices= new ArrayList<String>(Arrays.asList(selD));
+    	 
+    	 
     	}
     	else{
+    		
     		selectedDevices=AllJoynMasterService.nicks;
+    		
     	}
     	       MyCustomAdapter dataAdapter=null;
     	        dataAdapter = new MyCustomAdapter(this,
