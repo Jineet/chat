@@ -231,13 +231,16 @@ public class DialogBuilder {
                 	String[] selD=null;
                 	if(application.getFlag()==false){
                 	try {
-						 selD= AllJoynService.mGroupInterface.getMem();
+						 selD= AllJoynService.mGroupInterface.get_des_mem();
 						 Log.i(TAG,"selD set");
 					     } catch (BusException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					    }
+                	     if(selD!=null)
                 	     selectedDevices= new ArrayList<String>(Arrays.asList(selD));
+                	     else
+                	    	 return true;
                 	}
                 	else{
                 		selectedDevices= new ArrayList<String>();
@@ -282,16 +285,20 @@ public class DialogBuilder {
             	String name = channel.getText().toString();
             	ArrayList<String> selectedDevices;
             	String[] selD=null;
+            	
             	if(application.getFlag()==false){
             	try {
             		
-					 selD= AllJoynService.mGroupInterface.getMem();
-					 Log.i(TAG,"selD set" + selD[0]);
+					 selD= AllJoynService.mGroupInterface.get_des_mem();
+					 Log.i(TAG,"selD set" );
 				     } catch (BusException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				    }
+            	     if(selD!=null)
             	     selectedDevices= new ArrayList<String>(Arrays.asList(selD));
+            	     else
+            	    	 return;
             	}
             	else{
             		selectedDevices= new ArrayList<String>();

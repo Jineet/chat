@@ -13,4 +13,12 @@ public interface GroupInterface {
     public String[] getMem() throws BusException;
     @BusMethod 
     public String[] getUni() throws BusException;
+    @BusMethod
+    public String[] get_mob_uni() throws BusException;
+    @BusMethod
+    public String[] get_mob_mem() throws BusException;
+    @BusMethod
+    public String[] get_des_uni() throws BusException;
+    @BusMethod
+    public String[] get_des_mem() throws BusException;
 }

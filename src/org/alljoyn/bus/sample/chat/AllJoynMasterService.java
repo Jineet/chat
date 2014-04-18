@@ -1252,7 +1252,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	    	    @BusSignal
 	    	    public void Notify(String str, String nickname, double key) throws BusException{};
 	    	    @BusSignal
-	    	    public void nickname(String usrname , String all_unique)throws BusException{};
+	    	    public void nickname(String usrname , String all_unique, Boolean mob_or_desk)throws BusException{};
 	    	    @BusSignal
 	    	    public void validate(boolean val)throws BusException{};
 	    	    @BusSignal
@@ -1402,12 +1402,20 @@ public class AllJoynMasterService extends Service implements Observer {
 	        System.loadLibrary("alljoyn_java");
 	    }
 	    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "nickname")
-	    public void nickname(String usrname , String all_unique)throws BusException{
+	    public void nickname(String usrname , String all_unique, Boolean mob_or_desk)throws BusException{
 	    	SignalEmitter emitter = new SignalEmitter(mChatService, all_unique, mHostSessionId, SignalEmitter.GlobalBroadcast.Off);
             ChatInterface usrInterface = emitter.getInterface(ChatInterface.class);
             if (!nicks.contains(usrname)) {
                 nicks.add(usrname);
                 uniNames.add(all_unique);
+                if(mob_or_desk==true){
+                	des_name.add(usrname);
+                	des_uni.add(all_unique);
+                }
+                else{
+                	mob_name.add(usrname);
+                	des_uni.add(all_unique);
+                }
                 usrInterface.validate(true);
 
             } else {
@@ -1434,6 +1442,10 @@ public class AllJoynMasterService extends Service implements Observer {
 	    
 	    public static ArrayList<String> uniNames = new ArrayList<String>();
 	    public static ArrayList<String> nicks = new ArrayList<String>();
+	    public static ArrayList<String> mob_uni = new ArrayList<String>();
+	    public static ArrayList<String> mob_name = new ArrayList<String>();
+	    public static ArrayList<String> des_uni = new ArrayList<String>();
+	    public static ArrayList<String> des_name = new ArrayList<String>();
 	    
 	    public static class MethodHandler implements GroupInterface, BusObject {
 	   
@@ -1458,6 +1470,34 @@ public class AllJoynMasterService extends Service implements Observer {
             }
             return temp;
         }
+	    	public synchronized String[] get_mob_uni() throws BusException {
+	            String[] temp = new String[mob_uni.size()];
+	            for (int i = 0; i < mob_uni.size(); i++) {
+	                temp[i] = mob_uni.get(i);
+	            }
+	            return temp;
+	        }
+	    	public synchronized String[] get_mob_mem() throws BusException {
+	            String[] temp = new String[mob_name.size()];
+	            for (int i = 0; i < mob_name.size(); i++) {
+	                temp[i] = mob_name.get(i);
+	            }
+	            return temp;
+	        }
+	    	public synchronized String[] get_des_uni() throws BusException {
+	            String[] temp = new String[des_uni.size()];
+	            for (int i = 0; i < des_uni.size(); i++) {
+	                temp[i] = des_uni.get(i);
+	            }
+	            return temp;
+	        }
+	    	public synchronized String[] get_des_mem() throws BusException {
+	            String[] temp = new String[des_name.size()];
+	            for (int i = 0; i < des_name.size(); i++) {
+	                temp[i] = des_name.get(i);
+	            }
+	            return temp;
+	        }
 	   }
 	    
 	    public static void sendKeys(ArrayList<String> s) throws BusException{

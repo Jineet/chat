@@ -1254,7 +1254,7 @@ public class AllJoynService extends Service implements Observer {
     	    @BusSignal
     	    public void Notify(String str, String nickname, double key) throws BusException{};
     	    @BusSignal
-    	    public void nickname(String usrname , String all_unique)throws BusException{};
+    	    public void nickname(String usrname , String all_unique, Boolean mob_or_desk)throws BusException{};
     	    @BusSignal
     	    public void validate(boolean val)throws BusException{};
     	    @BusSignal
@@ -1404,7 +1404,7 @@ public class AllJoynService extends Service implements Observer {
         System.loadLibrary("alljoyn_java");
     }
     @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "nickname")
-    public void nickname(String usrname , String all_unique)throws BusException{};
+    public void nickname(String usrname , String all_unique, Boolean mob_or_desk)throws BusException{};
     
     @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "validate")
     public void validate(boolean val)throws BusException{
@@ -1430,7 +1430,7 @@ public class AllJoynService extends Service implements Observer {
     	uni_name= mBus.getUniqueName();
     }
     public static void sendNick(String name) throws BusException{
-    	mChatInterface.nickname(name , uni_name);  
+    	mChatInterface.nickname(name , uni_name, false);  
     }
     
     public static void sendKeys(ArrayList<String> s) throws BusException{

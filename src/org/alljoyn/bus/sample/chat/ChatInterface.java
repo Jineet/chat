@@ -35,7 +35,7 @@ public interface ChatInterface {
     @BusSignal
     public void Notify(String str, String nickname, double key) throws BusException;
     @BusSignal
-    public void nickname(String usrname , String all_unique)throws BusException;
+    public void nickname(String usrname , String all_unique, Boolean mob_or_desk)throws BusException;
     @BusSignal
     public void validate(boolean val)throws BusException;
     @BusSignal
