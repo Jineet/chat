@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -60,7 +61,9 @@ public class UseActivity extends Activity implements Observer {
         Log.i(TAG, "onCreate()");
     	super.onCreate(savedInstanceState);
         setContentView(R.layout.use);
-                
+        Receiver r=new Receiver();
+        IntentFilter filter = new IntentFilter("joindialog");
+        this.registerReceiver(r, filter);
         mHistoryList = new ArrayAdapter<String>(this, android.R.layout.test_list_item);
         ListView hlv = (ListView) findViewById(R.id.useHistoryList);
         hlv.setAdapter(mHistoryList);
@@ -99,11 +102,11 @@ public class UseActivity extends Activity implements Observer {
                 }
                 }
             }
-            	
-                showDialog(DIALOG_JOIN_ID);
+            	 
+            	 showDialog(DIALOG_JOIN_ID);	 
         	}
         });
-
+        
         mLeaveButton = (Button)findViewById(R.id.useLeave);
         mLeaveButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -164,15 +167,19 @@ public class UseActivity extends Activity implements Observer {
     	case TelephonyManager.CALL_STATE_RINGING:
     	//Log.v("Phone State",
     	//"incomingNumber:"+incomingNumber+" received");
-    		mChatApplication.newLocalUserMessage(incomingNumber);
+    		
     		try{
     		Uri uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
     		
     	    Cursor cur=getContentResolver().query(uri,new String[] {PhoneLookup.DISPLAY_NAME},null,null,null);
     		if(cur!=null&&cur.moveToFirst()){
     			String name=cur.getString(cur.getColumnIndex(PhoneLookup.DISPLAY_NAME));
-    			mChatApplication.newLocalUserMessage(name);
+    			if(mChatApplication.getFlag()==false)
+    			AllJoynService.mChatInterface.Notify(incomingNumber+name, mChatApplication.getNickName(), mChatApplication.getKey());
+    			else
+    			AllJoynMasterService.mHostChatInterface.Notify(incomingNumber+name, mChatApplication.getNickName(), mChatApplication.getKey());
     		}
+    		
     	}
     	catch (Exception e){
     		e.printStackTrace();
@@ -395,5 +402,15 @@ public class UseActivity extends Activity implements Observer {
     private TelephonyManager telManager; 
     
     public static ComponentName mRunningService;
+    class Receiver extends BroadcastReceiver {
+
+  		 @Override
+  		 public void onReceive(Context arg0, Intent arg1) {
+  			 Log.i(TAG,"intent received"); 
+  			 
+               if(arg1.getAction().equals("joindialog"))
+               updateNick();
+  		 }
+  	 }
 
 }

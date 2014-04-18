@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="top|center"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="@drawable/back" >
 
     <TableLayout
         android:layout_width="match_parent"
@@ -11,56 +12,75 @@
 
         <TableRow android:gravity="center" >
 
-            <TextView android:text="Channel Name:  " />
+            <TextView android:text="Channel Name:  "
+                		android:textSize="15dp"
+                		android:layout_marginTop="10dp"
+                		android:layout_marginBottom="5dp" />
 
             <TextView
                 android:id="@+id/hostChannelName"
-                android:text="1234567890" />
+                android:text="1234567890" 
+                android:textSize="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"/>
         </TableRow>
 
         <TableRow android:gravity="center" >
 
-            <TextView android:text="Channel Status:  " />
+            <TextView android:text="Channel Status:  "
+                		android:textSize="15dp"
+                		android:layout_marginTop="10dp"
+                		android:layout_marginBottom="5dp" />
 
             <TextView
                 android:id="@+id/hostChannelStatus"
-                android:text="1234567890" />
+                android:text="1234567890" 
+                android:textSize="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"/>
         </TableRow>
     </TableLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="5dip" >
+        android:layout_height="5dip"
+        android:textSize="15dp" >
     </View>
 
     <Button
         android:id="@+id/hostSetName"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:text="Set Channel Name" />
+        android:layout_width="250dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp" 
+        android:background="@drawable/channelname"/>
 
     <Button
         android:id="@+id/hostStart"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:text="Start Channel" />
+        android:layout_width="250dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/startchannel"  />
 
     <Button
         android:id="@+id/hostStop"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:text="Stop Channel" />
+        android:layout_width="250dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/stopchannel" />
 
     <Button
         android:id="@+id/hostSelect"
-        android:layout_width="180dp"
-        android:layout_height="wrap_content"
-        android:text="Select Devices" />
+        android:layout_width="250dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/selectdevice"  />
 
     <Button
         android:id="@+id/hostQuit"
-        android:layout_width="180dp"
-        android:layout_height="45dp"
-        android:text="Quit Application" />
+        android:layout_width="250dp"
+        android:layout_height="35dp"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/quit" />
 
 </LinearLayout>

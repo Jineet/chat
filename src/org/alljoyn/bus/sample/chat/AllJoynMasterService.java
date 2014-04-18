@@ -988,7 +988,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	     * by the application.  See the long comment in doJoinSession() for a
 	     * description of this rather non-intuitively complicated case.
 	     */
-	    ChatInterface mHostChatInterface = null;
+	   static ChatInterface mHostChatInterface = null;
 	    
 	    /**
 	     * Implementation of the functionality related to advertising a service on
@@ -1217,7 +1217,7 @@ public class AllJoynMasterService extends Service implements Observer {
 	            Log.i(TAG, "doSendMessages(): sending message \"" + message + "\"");
 	            /*
 	             * If we are joined to a remote session, we send the message over
-	             * the mChatInterface.  If we are implicityly joined to a session
+	             * the mChatInterface.  If we are implicitly joined to a session
 	             * we are hosting, we send the message over the mHostChatInterface.
 	             * The mHostChatInterface may or may not exist since it is created
 	             * when the sessionJoined() callback is fired in the
@@ -1226,10 +1226,10 @@ public class AllJoynMasterService extends Service implements Observer {
 				try {
 					if (mJoinedToSelf) {
 						if (mHostChatInterface != null) {
-							mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
+							mHostChatInterface.send_message(message,mChatApplication.getNickName());
 						}
 					} else {
-						mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
+						mHostChatInterface.send_message(message,mChatApplication.getNickName());
 					}
 				} catch (BusException ex) {
 		    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Bus exception while sending message: (" + ex + ")");
@@ -1259,6 +1259,8 @@ public class AllJoynMasterService extends Service implements Observer {
 	    	    public void sendKey(Double a)throws BusException{}; 
 	    	    @BusSignal
 	    	    public void askKey(String name)throws BusException{};
+	    	    @BusSignal
+	    	    public void send_message(String nick, String msg)throws BusException{};
 	    }
 
 	    /**
@@ -1332,6 +1334,58 @@ public class AllJoynMasterService extends Service implements Observer {
 	        if (key_exist || key1 == 0 || mChatApplication.getKey() == key1) {
 	        mChatApplication.newRemoteUserMessage(nickname1, string);
 	        }
+	        
+	        
+	    }
+	    
+	    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "send_message")
+	    public void send_message(String msg, String nick) {
+	    	
+	        /*
+	    	 * See the long comment in doJoinSession() for more explanation of
+	    	 * why this is needed.
+	    	 * 
+	    	 * The only time we allow a signal from the hosted session ID to pass
+	    	 * through is if we are in mJoinedToSelf state.  If the source of the
+	    	 * signal is us, we also filter out the signal since we are going to
+	    	 * locally echo the signal.
+
+	     	 */
+	    
+	    	String uniqueName = mBus.getUniqueName();
+	    	MessageContext ctx = mBus.getMessageContext();
+	        Log.i(TAG, "Chat(): use sessionId is " + mUseSessionId);
+	        Log.i(TAG, "Chat(): message sessionId is " + ctx.sessionId);
+	        
+	        /*
+	         * Always drop our own signals which may be echoed back from the system.
+	         */
+	        if (ctx.sender.equals(uniqueName)) {
+	            Log.i(TAG, "Chat(): dropped our own signal received on session " + ctx.sessionId);
+	    		return;
+	    	}
+
+	        /*
+	         * Drop signals on the hosted session unless we are joined-to-self.
+	         */
+	        if (mJoinedToSelf == false && ctx.sessionId == mHostSessionId) {
+	            Log.i(TAG, "Chat(): dropped signal received on hosted session " + ctx.sessionId + " when not joined-to-self");
+	    		return;
+	    	}
+	    	
+	        /*
+	         * To keep the application simple, we didn't force users to choose a
+	         * nickname.  We want to identify the message source somehow, so we
+	         * just use the unique name of the sender's bus attachment.
+	         */
+	        String nickname = ctx.sender;
+	        
+	        String nickname1 = nick;           
+	        Log.i(TAG, "Chat(): signal " + msg + " received from nickname " + nickname);
+	        
+	        mChatApplication.newRemoteUserMessage(nickname1, msg);
+	        
+	        
 	        
 	        
 	    }

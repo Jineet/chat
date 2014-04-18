@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -68,7 +69,7 @@ public class DialogBuilder {
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
     	dialog.setContentView(R.layout.usejoindialog);
     	
-        ArrayAdapter<String> channelListAdapter = new ArrayAdapter<String>(activity, android.R.layout.test_list_item);
+        final ArrayAdapter<String> channelListAdapter = new ArrayAdapter<String>(activity, android.R.layout.test_list_item);
     	final ListView channelList = (ListView)dialog.findViewById(R.id.useJoinChannelList);
         channelList.setAdapter(channelListAdapter);
         
@@ -116,6 +117,23 @@ public class DialogBuilder {
     		}
     	});
     	
+    	Button refresh = (Button)dialog.findViewById(R.id.useJoinRefersh);
+    	refresh.setOnClickListener(new View.OnClickListener() {
+    		public void onClick(View view) {
+    			List<String> channels = application.getFoundChannels();
+    	        for (String channel : channels) {
+    	        	int lastDot = channel.lastIndexOf('.');
+    	        	if (lastDot < 0) {
+    	        		continue;
+    	        	}
+    	            channelListAdapter.add(channel.substring(lastDot + 1));
+    	            Log.i(TAG,"refresh called"+channel.substring(lastDot + 1));
+    	        }
+    	        
+    		    channelListAdapter.notifyDataSetChanged();
+    		}
+    	});
+    	
     	return dialog;
     }
     
@@ -144,7 +162,7 @@ public class DialogBuilder {
     	return dialog;
     }
     
-    public Dialog createHostNameDialog(Activity activity, final ChatApplication application) {
+    public Dialog createHostNameDialog(final Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostNameDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -155,10 +173,16 @@ public class DialogBuilder {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 	String name = view.getText().toString();
+                	if(name.equals("")){
+                		Dialog d= createNickErrorDialog(activity);
+                		d.show();
+                	}
+                	else{
     				application.hostSetChannelName(name);
     				application.hostInitChannel();
         			dialog.cancel();
-                }
+                    }
+              }
                 return true;
             }
         });
@@ -167,10 +191,16 @@ public class DialogBuilder {
         okay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	String name = channel.getText().toString();
+            	if(name.equals("")){
+            		Dialog d= createNickErrorDialog(activity);
+            		d.show();
+            	}
+            	else{
 				application.hostSetChannelName(name);
 				application.hostInitChannel();
     			dialog.cancel();
             }
+           } 	
         });
         
         Button cancel = (Button)dialog.findViewById(R.id.hostNameCancel);
@@ -202,6 +232,7 @@ public class DialogBuilder {
                 	if(application.getFlag()==false){
                 	try {
 						 selD= AllJoynService.mGroupInterface.getMem();
+						 Log.i(TAG,"selD set");
 					     } catch (BusException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -253,7 +284,9 @@ public class DialogBuilder {
             	String[] selD=null;
             	if(application.getFlag()==false){
             	try {
+            		
 					 selD= AllJoynService.mGroupInterface.getMem();
+					 Log.i(TAG,"selD set" + selD[0]);
 				     } catch (BusException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -263,7 +296,7 @@ public class DialogBuilder {
             	else{
             		selectedDevices= new ArrayList<String>();
             	}
-            	if(selectedDevices.contains(name)){
+            	if(selectedDevices.contains(name)||name.equals("")){
             		Dialog d= createNickErrorDialog(activity);
             		d.show();
             		application.useLeaveChannel();
@@ -390,7 +423,7 @@ public class DialogBuilder {
     	return dialog;
     } 
     
-    public Dialog createHostNickDialog1(Activity activity, final ChatApplication application) {
+    public Dialog createHostNickDialog1(final Activity activity, final ChatApplication application) {
        	Log.i(TAG, "createHostNickDialog()");
     	final Dialog dialog = new Dialog(activity);
     	dialog.requestWindowFeature(dialog.getWindow().FEATURE_NO_TITLE);
@@ -402,7 +435,15 @@ public class DialogBuilder {
             public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                 	String name = view.getText().toString();
-                	
+                	if(name.equals("")){
+                		Dialog d= createNickErrorDialog(activity);
+                		d.show();
+                		
+                	}
+                	else{
+                	Intent intent=new Intent("joindialog");
+                	activity.sendBroadcast(intent);
+                	Log.i(TAG,"intent sent");
                 	application.setNickName(name);
                 	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
                     mHandler.sendMessage(message);
@@ -424,7 +465,7 @@ public class DialogBuilder {
     				//validate method to be called here
                 	dialog.cancel();
                	    }
-                
+                }
                 return true;
             }
         });
@@ -433,7 +474,16 @@ public class DialogBuilder {
         okay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
             	String name = channel.getText().toString();
+            	if(name.equals("")){
+            		Dialog d= createNickErrorDialog(activity);
+            		d.show();
+            	}
+            	else{
             	application.setNickName(name);
+            	
+            	Intent intent=new Intent("joindialog");
+            	activity.sendBroadcast(intent);
+            	Log.i(TAG,"intent sent");
             	Message message = mHandler.obtainMessage(UseActivity.HANDLE_NICK_CHANGE_EVENT);
                 mHandler.sendMessage(message);
                 Log.i(TAG,"Handler message"+message);
@@ -452,7 +502,7 @@ public class DialogBuilder {
             	}
 				//validate method to be called here
     			dialog.cancel();
-            	
+            	}
             }
         });
         

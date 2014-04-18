@@ -42,4 +42,6 @@ public interface ChatInterface {
     public void sendKey(Double a)throws BusException;
     @BusSignal
     public void askKey(String name)throws BusException;
+    @BusSignal
+    public void send_message(String msg, String nick)throws BusException;
 }

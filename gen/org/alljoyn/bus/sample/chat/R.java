@@ -11,14 +11,78 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int ic_tab_host=0x7f020000;
-        public static final int ic_tab_host_disabled=0x7f020001;
-        public static final int ic_tab_host_enabled=0x7f020002;
-        public static final int ic_tab_use=0x7f020003;
-        public static final int ic_tab_use_disabled=0x7f020004;
-        public static final int ic_tab_use_enabled=0x7f020005;
-        public static final int icon=0x7f020006;
-        public static final int icon3=0x7f020007;
+        public static final int back=0x7f020000;
+        public static final int channel=0x7f020001;
+        public static final int channeldialogcancel=0x7f020002;
+        public static final int channelname=0x7f020003;
+        public static final int deviceok=0x7f020004;
+        public static final int djoin=0x7f020005;
+        public static final int djoinchannel=0x7f020006;
+        public static final int dleave=0x7f020007;
+        public static final int dleavechannel=0x7f020008;
+        public static final int ds1=0x7f020009;
+        public static final int ds2=0x7f02000a;
+        public static final int ds3=0x7f02000b;
+        public static final int ds4=0x7f02000c;
+        public static final int ds5=0x7f02000d;
+        public static final int ic_tab_host=0x7f02000e;
+        public static final int ic_tab_host_disabled=0x7f02000f;
+        public static final int ic_tab_host_enabled=0x7f020010;
+        public static final int ic_tab_use=0x7f020011;
+        public static final int ic_tab_use_disabled=0x7f020012;
+        public static final int ic_tab_use_enabled=0x7f020013;
+        public static final int icon=0x7f020014;
+        public static final int icon3=0x7f020015;
+        public static final int join=0x7f020016;
+        public static final int join1=0x7f020017;
+        public static final int joincancel=0x7f020018;
+        public static final int joinchannel=0x7f020019;
+        public static final int joinok=0x7f02001a;
+        public static final int leave=0x7f02001b;
+        public static final int leave1=0x7f02001c;
+        public static final int leavecancel=0x7f02001d;
+        public static final int leavechannel=0x7f02001e;
+        public static final int leaveok=0x7f02001f;
+        public static final int oc1=0x7f020020;
+        public static final int oc2=0x7f020021;
+        public static final int oc3=0x7f020022;
+        public static final int oc4=0x7f020023;
+        public static final int oc5=0x7f020024;
+        public static final int ojoin=0x7f020025;
+        public static final int ojoincancel=0x7f020026;
+        public static final int ojoinchannel=0x7f020027;
+        public static final int ojoinok=0x7f020028;
+        public static final int oleave=0x7f020029;
+        public static final int oleavecancel=0x7f02002a;
+        public static final int oleavechannel=0x7f02002b;
+        public static final int oleaveok=0x7f02002c;
+        public static final int osetcancel=0x7f02002d;
+        public static final int osetok=0x7f02002e;
+        public static final int ostartcancel=0x7f02002f;
+        public static final int ostartok=0x7f020030;
+        public static final int ostopcancel=0x7f020031;
+        public static final int ostopok=0x7f020032;
+        public static final int quit=0x7f020033;
+        public static final int s1=0x7f020034;
+        public static final int s2=0x7f020035;
+        public static final int s3=0x7f020036;
+        public static final int s4=0x7f020037;
+        public static final int s5=0x7f020038;
+        public static final int selectdevice=0x7f020039;
+        public static final int setcancel=0x7f02003a;
+        public static final int setcancel1=0x7f02003b;
+        public static final int setok=0x7f02003c;
+        public static final int setok1=0x7f02003d;
+        public static final int startcancel=0x7f02003e;
+        public static final int startcancel1=0x7f02003f;
+        public static final int startchannel=0x7f020040;
+        public static final int startok=0x7f020041;
+        public static final int startok1=0x7f020042;
+        public static final int stopcancel=0x7f020043;
+        public static final int stopcancel1=0x7f020044;
+        public static final int stopchannel=0x7f020045;
+        public static final int stopok=0x7f020046;
+        public static final int stopok1=0x7f020047;
     }
     public static final class id {
         public static final int button1=0x7f050010;
@@ -29,7 +93,7 @@ public final class R {
         public static final int editTextNick=0x7f05000c;
         public static final int errorDescription=0x7f050000;
         public static final int errorOk=0x7f050001;
-        public static final int findSelected=0x7f050011;
+        public static final int findSelected=0x7f050012;
         public static final int hostChannelName=0x7f050002;
         public static final int hostChannelStatus=0x7f050003;
         public static final int hostNameCancel=0x7f05000b;
@@ -45,7 +109,7 @@ public final class R {
         public static final int hostStop=0x7f050006;
         public static final int hostStopCancel=0x7f050016;
         public static final int hostStopOk=0x7f050015;
-        public static final int listView1=0x7f050012;
+        public static final int listView1=0x7f050011;
         public static final int textView1=0x7f05000f;
         public static final int useChannelName=0x7f050019;
         public static final int useChannelStatus=0x7f05001b;
@@ -53,9 +117,10 @@ public final class R {
         public static final int useJoin=0x7f05001c;
         public static final int useJoinCancel=0x7f050021;
         public static final int useJoinChannelList=0x7f050020;
+        public static final int useJoinRefersh=0x7f050022;
         public static final int useLeave=0x7f05001d;
-        public static final int useLeaveCancel=0x7f050023;
-        public static final int useLeaveOk=0x7f050022;
+        public static final int useLeaveCancel=0x7f050024;
+        public static final int useLeaveOk=0x7f050023;
         public static final int useMessage=0x7f05001e;
     }
     public static final class layout {

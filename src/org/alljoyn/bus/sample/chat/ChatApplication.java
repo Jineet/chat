@@ -533,6 +533,7 @@ public class ChatApplication extends Application implements Observable {
 			     e.printStackTrace();
 			   }
 		}
+		if(!message.equals("bomb"))
 		addInboundItem(nickname, message);
 	}
 

@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="#000" >
 
     <EditText
         android:id="@+id/editTextNick"
@@ -23,17 +24,25 @@
 
         <Button
             android:id="@+id/buttonOkNick"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
             android:layout_weight="0.34"
-            android:text="OK" />
+            android:background="@drawable/startok"
+            android:layout_marginRight="10dp"
+    	    android:layout_marginLeft="5dp"
+    	    android:layout_marginBottom="5dp" 
+            
+             />
 
         <Button
             android:id="@+id/buttonOkNick2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
             android:layout_weight="0.26"
-            android:text="Cancel" />
+            android:background="@drawable/startcancel"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+           />
 
     </LinearLayout>
 

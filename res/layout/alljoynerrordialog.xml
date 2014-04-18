@@ -14,6 +14,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="An error has been reported by AllJoyn:"
+        android:textSize="15dp"
     />
 
     <TextView
@@ -22,6 +23,8 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="No error (ER_OK)"
+        android:textSize="15dp"
+        
     />
       
     <LinearLayout
@@ -34,8 +37,8 @@
         <Button
             android:id="@+id/errorOk"
             android:layout_width="120dp"
-            android:layout_height="wrap_content"
-    	    android:text="OK"
+            android:layout_height="40dp"
+    	    android:background="@drawable/setok"
         />
         
     </LinearLayout>

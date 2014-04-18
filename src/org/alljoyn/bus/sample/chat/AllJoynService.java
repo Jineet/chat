@@ -69,7 +69,8 @@ public class AllJoynService extends Service implements Observer {
 	private static final String TAG = "chat.AllJoynService";
    
 	/**
-	 * We don't use the bindery to communiate between any client and this
+	 * 
+	 * We don't use the bindary to communicate between any client in this
 	 * service so we return null.
 	 */
 	public IBinder onBind(Intent intent) {
@@ -78,8 +79,7 @@ public class AllJoynService extends Service implements Observer {
 	}
 	
 	/**
-	 * Our onCreate() method is called by the Android appliation framework
-	 * when the service is first created.  We spin up a background thread
+	 * We spin up a background thread
 	 * to handle any long-lived requests (pretty much all AllJoyn calls that
 	 * involve communication with remote processes) that need to be done and
 	 * insinuate ourselves into the list of observers of the model so we can
@@ -91,7 +91,7 @@ public class AllJoynService extends Service implements Observer {
         mChatApplication = (ChatApplication)getApplication();
         mChatApplication.addObserver(this);
         
-        CharSequence title = "AllJoyn";
+        CharSequence title = "SmartJoyn";
         CharSequence message = "Chat Channel Hosting Service.";
         Intent intent = new Intent(this, TabWidget.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
@@ -141,10 +141,10 @@ public class AllJoynService extends Service implements Observer {
 	 * framework when a client explicitly starts a Service by calling 
 	 * startService().  We expect that the only place this is going to be done
 	 * is when the Android Application class for our application is created.
-	 * The Appliation class provides our model in the sense of the MVC
+	 * The Application class provides our model in the sense of the MVC
 	 * application we really are.
 	 * 
-	 * We return START_STICKY to enable us to be explicity started and stopped
+	 * We return START_STICKY to enable us to be explicitly started and stopped
 	 * which means that our Service will essentially run "forever" (or until 
 	 * Android decides that we should die for resource management issues) since
 	 * our Application class is left running as long as the process is left running.
@@ -155,14 +155,14 @@ public class AllJoynService extends Service implements Observer {
 	}
 	
     /**
-     * A reference to a descendent of the Android Application class that is
+     * A reference to a descendant of the Android Application class that is
      * acting as the Model of our MVC-based application.
      */
      private static ChatApplication mChatApplication = null;
 	
     /**
      * This is the event handler for the Observable/Observed design pattern.
-     * Whenever an interesting event happens in our appliation, the Model (the
+     * Whenever an interesting event happens in our application, the Model (the
      * source of the event) notifies registered observers, resulting in this
      * method being called since we registered as an Observer in onCreate().
      * 
@@ -620,7 +620,7 @@ public class AllJoynService extends Service implements Observer {
     
     /**
      * Since basically our whole reason for being is to spin up a thread to
-     * handle long-lived remote operations, we provide thsi method to do so.
+     * handle long-lived remote operations, we provide this method to do so.
      */
     private void startBusThread() {
         HandlerThread busThread = new HandlerThread("BackgroundHandler");
@@ -689,6 +689,7 @@ public class AllJoynService extends Service implements Observer {
             Log.i(TAG, "mBusListener.foundAdvertisedName(" + name + ")");
 			ChatApplication application = (ChatApplication)getApplication();
 			application.addFoundChannel(name);
+			
 		}
 		
    		/**
@@ -794,6 +795,8 @@ public class AllJoynService extends Service implements Observer {
         Log.i(TAG, "doStartDiscovery()");
     	assert(mBusAttachmentState == BusAttachmentState.CONNECTED);
       	Status status = mBus.findAdvertisedName(NAME_PREFIX);
+      	
+		
     	if (status == Status.OK) {
         	mBusAttachmentState = BusAttachmentState.DISCOVERING;
         	return;
@@ -801,6 +804,7 @@ public class AllJoynService extends Service implements Observer {
     		mChatApplication.alljoynError(ChatApplication.Module.USE, "Unable to start finding advertised names: (" + status + ")");
         	return;
     	}
+    	
     }
     
     /**
@@ -1157,7 +1161,7 @@ public class AllJoynService extends Service implements Observer {
         Log.i(TAG, "mChatInterface set");
         mProxyObj = mBus.getProxyBusObject(wellKnownName, "/chatService", sessionId.value, new Class<?>[] {GroupInterface.class});
         mGroupInterface = mProxyObj.getInterface(GroupInterface.class);
-       
+        Log.i(TAG,"mGroupInterface created");
      	mUseChannelState = UseChannelState.JOINED;
       	mChatApplication.useSetChannelState(mUseChannelState);
     }
@@ -1223,11 +1227,11 @@ public class AllJoynService extends Service implements Observer {
 				if (mJoinedToSelf) {
 					if (mHostChatInterface != null) {
 						
-						mHostChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
+						mHostChatInterface.send_message(message,mChatApplication.getNickName());
 					}
 				} else {
 					
-					mChatInterface.Notify(message,mChatApplication.getNickName(),mChatApplication.getKey());
+					mChatInterface.send_message(message,mChatApplication.getNickName());
 				}
 			} catch (BusException ex) {
 	    		mChatApplication.alljoynError(ChatApplication.Module.USE, "Bus exception while sending message: (" + ex + ")");
@@ -1257,6 +1261,8 @@ public class AllJoynService extends Service implements Observer {
     	    public void sendKey(Double a)throws BusException{};
     	    @BusSignal
     	    public void askKey(String name)throws BusException{};
+    	    @BusSignal
+    	    public void send_message(String nick, String msg)throws BusException{};
     }
 
     /**
@@ -1334,6 +1340,57 @@ public class AllJoynService extends Service implements Observer {
         
     }
     
+    @BusSignalHandler(iface = "org.alljoyn.bus.samples.chat", signal = "send_message")
+    public void send_message(String msg, String nick) {
+    	
+        /*
+    	 * See the long comment in doJoinSession() for more explanation of
+    	 * why this is needed.
+    	 * 
+    	 * The only time we allow a signal from the hosted session ID to pass
+    	 * through is if we are in mJoinedToSelf state.  If the source of the
+    	 * signal is us, we also filter out the signal since we are going to
+    	 * locally echo the signal.
+
+     	 */
+    
+    	String uniqueName = mBus.getUniqueName();
+    	MessageContext ctx = mBus.getMessageContext();
+        Log.i(TAG, "Chat(): use sessionId is " + mUseSessionId);
+        Log.i(TAG, "Chat(): message sessionId is " + ctx.sessionId);
+        
+        /*
+         * Always drop our own signals which may be echoed back from the system.
+         */
+        if (ctx.sender.equals(uniqueName)) {
+            Log.i(TAG, "Chat(): dropped our own signal received on session " + ctx.sessionId);
+    		return;
+    	}
+
+        /*
+         * Drop signals on the hosted session unless we are joined-to-self.
+         */
+        if (mJoinedToSelf == false && ctx.sessionId == mHostSessionId) {
+            Log.i(TAG, "Chat(): dropped signal received on hosted session " + ctx.sessionId + " when not joined-to-self");
+    		return;
+    	}
+    	
+        /*
+         * To keep the application simple, we didn't force users to choose a
+         * nickname.  We want to identify the message source somehow, so we
+         * just use the unique name of the sender's bus attachment.
+         */
+        String nickname = ctx.sender;
+        
+        String nickname1 = nick;           
+        Log.i(TAG, "Chat(): signal " + msg + " received from nickname " + nickname);
+        
+        mChatApplication.newRemoteUserMessage(nickname1, msg);
+        
+        
+        
+        
+    }
     
    
     

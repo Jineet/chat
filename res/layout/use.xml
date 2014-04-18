@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/back">
    
     <TableLayout
         android:layout_width="match_parent"
@@ -12,31 +13,37 @@
    	        
    	        <TextView
     	        android:text="Channel Name:  "
+    	        android:textSize="15dp"
             />
          
             <TextView
                 android:id="@+id/useChannelName"
     	        android:text="1234567890"
+    	        android:textSize="15dp"
             />
         </TableRow>
 
         <TableRow android:gravity="center" >
 
-            <TextView android:text="Nickname" />
+            <TextView android:text="Nickname"
+                	  android:textSize="15dp" />
 
             <TextView
                 android:id="@+id/hostNickname"
-                android:text="" />
+                android:text="" 
+                android:textSize="15dp"/>
         </TableRow>
         
         <TableRow android:gravity="center"> 
             <TextView
     	         android:text="Channel Status:  "
+    	         android:textSize="15dp"
             />
          
             <TextView
                 android:id="@+id/useChannelStatus"
     	        android:text="1234567890"
+    	        android:textSize="15dp"
             />
         </TableRow>
     </TableLayout>
@@ -46,20 +53,24 @@
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp">
+        android:layout_marginTop="5dp"
+        >
         
         <Button
             android:id="@+id/useJoin"        
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-    	    android:text="Join Channel"
+            android:layout_width="125dp"
+            android:layout_height="40dp"
+    	    android:background="@drawable/join"
+    	    android:layout_marginRight="5dp"
         />
         
         <Button
             android:id="@+id/useLeave"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-    	    android:text="Leave Channel"
+            android:layout_width="125dp"
+            android:layout_height="40dp"
+    	    android:background="@drawable/leave"
+    	    android:layout_marginRight="5dp"
+    	    android:layout_marginLeft="5dp"
         />
     </LinearLayout>
     
@@ -68,15 +79,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-		android:hint="Enter message here"
-    />
+        android:hint="Enter message here"
+        android:textColorHighlight="#045"
+        android:textColorHint="#045" />
        
     <ListView
         android:id="@+id/useHistoryList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
-        android:background="#ff000000"
         android:divider="#ff505050"
         android:dividerHeight="1dp"
         android:transcriptMode="alwaysScroll" />
